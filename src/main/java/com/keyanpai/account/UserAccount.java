@@ -7,18 +7,18 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import com.keyanpai.esImp.ESSearchImp;
-import com.keyanpai.instance.ESClient;
-import com.keyanpai.instance.MySearchOption.SearchLogic;
+import com.keyanpai.es.ESClient;
+import com.keyanpai.es.ESSearchImp;
+import com.keyanpai.es.MySearchOption.SearchLogic;
 
 
 
-public class userAccount extends account {
+public class UserAccount extends Account {
 	private ESClient esClient = new ESClient();
 	private ESSearchImp esSearchImp = new ESSearchImp();
-	private Logger logger = Logger.getLogger(adminAccount.class);
+	private Logger logger = Logger.getLogger(AdminAccount.class);
 	
-	public userAccount(String id  ,String ip
+	public UserAccount(String id  ,String ip
 			   ,String name,String password  )
 	{
 			this.setId(id);

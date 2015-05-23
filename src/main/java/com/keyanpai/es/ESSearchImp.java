@@ -1,4 +1,4 @@
-package com.keyanpai.esImp;
+package com.keyanpai.es;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,10 +27,8 @@ import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 
-import com.keyanpai.esInterface.ESSearch;
-import com.keyanpai.instance.MySearchOption;
-import com.keyanpai.instance.MySearchOption.DataFilter;
-import com.keyanpai.instance.MySearchOption.SearchLogic;
+import com.keyanpai.es.MySearchOption.DataFilter;
+import com.keyanpai.es.MySearchOption.SearchLogic;
 
 
 public class ESSearchImp implements ESSearch{
@@ -177,7 +175,7 @@ try{
 			 return QueryBuilders.filteredQuery(queryBuilder, andFilterBuilder);
 		   }
 		     /*构造过滤条件*/
-			System.out.println("filterContentMap != null");
+			//System.out.println("filterContentMap != null");
 			QueryFilterBuilder queryFilterBuilder = FilterBuilders				
 					.queryFilter(this.createQueryBuilder(filterContentMap, filterLogic));
 			/*构造not过滤条件，表示搜索结果不包含这些内容，而不是不过滤*/
@@ -241,7 +239,7 @@ try{
 		// TODO Auto-generated method stub
 		try{
 			if(mySearchOption.getSearchType() 
-					== com.keyanpai.instance.MySearchOption.SearchType.range)
+					== com.keyanpai.es.MySearchOption.SearchType.range)
 				return this.createRangeQueryBuilder(field,values);
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 			 for (Object valueItem : values) {
@@ -252,11 +250,11 @@ try{
 				 String formatValue = valueItem.toString().trim().replace("*", "");//格式化搜索数据
 		
 				 if (mySearchOption.getSearchType() 
-						 == com.keyanpai.instance.MySearchOption.SearchType.term) {
+						 == com.keyanpai.es.MySearchOption.SearchType.term) {
 					 queryBuilder = QueryBuilders.termQuery(field, formatValue).boost(mySearchOption.getBoost());
 				 }
 				 else if (mySearchOption.getSearchType() 
-						 == com.keyanpai.instance.MySearchOption.SearchType.querystring) {
+						 == com.keyanpai.es.MySearchOption.SearchType.querystring) {
 //					 if (formatValue.length() == 1) {
 //						 /*如果搜索长度为1的非数字的字符串，格式化为通配符搜索，暂时这样，以后有时间改成multifield搜索，就不需要通配符了*/
 //						 if (!Pattern.matches("[0-9]", formatValue)) {

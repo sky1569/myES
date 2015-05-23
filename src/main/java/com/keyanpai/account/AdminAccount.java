@@ -8,22 +8,22 @@ import java.util.concurrent.ExecutionException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import com.keyanpai.dbImp.DBServiceImp;
-import com.keyanpai.esImp.ESControlImp;
-import com.keyanpai.esImp.ESSearchImp;
-import com.keyanpai.instance.DBConfigure;
-import com.keyanpai.instance.ESClient;
-import com.keyanpai.instance.MySearchOption.SearchLogic;
+import com.keyanpai.db.DBConfigure;
+import com.keyanpai.db.DBServiceImp;
+import com.keyanpai.es.ESClient;
+import com.keyanpai.es.ESControlImp;
+import com.keyanpai.es.ESSearchImp;
+import com.keyanpai.es.MySearchOption.SearchLogic;
 
 
-public class adminAccount extends account {
+public class AdminAccount extends Account {
 	private ESClient esClient = new ESClient();
 	private ESControlImp esControlImp = ESControlImp.getInstance();
 	private ESSearchImp esSearchImp = new ESSearchImp();
 	private DBServiceImp dbServiceImp = DBServiceImp.getDBServiceImp();
-	private Logger logger = Logger.getLogger(adminAccount.class);
+	private Logger logger = Logger.getLogger(AdminAccount.class);
 	
-	public adminAccount(String id
+	public AdminAccount(String id
 					   ,String ip
 					   ,String name
 					   ,String password

@@ -1,8 +1,7 @@
-package com.keyanpai.dbInterface;
+package com.keyanpai.db;
 
 
-import com.keyanpai.esImp.ESControlImp;
-import com.keyanpai.instance.DBConfigure;
+import com.keyanpai.es.ESControlImp;
 
 public interface DBService {
 	boolean DBSetter(DBConfigure dbConfigure);

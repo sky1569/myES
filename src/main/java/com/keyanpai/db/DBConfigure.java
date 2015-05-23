@@ -1,4 +1,4 @@
-package com.keyanpai.instance;
+package com.keyanpai.db;
 
 import java.util.Map;
 

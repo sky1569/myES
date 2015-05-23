@@ -1,4 +1,4 @@
-package com.keyanpai.esInterface;
+package com.keyanpai.es;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.elasticsearch.common.Nullable;
 
-import com.keyanpai.instance.MySearchOption.SearchLogic;
+import com.keyanpai.es.MySearchOption.SearchLogic;
 
 public interface ESStat {
 

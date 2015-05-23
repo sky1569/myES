@@ -1,4 +1,4 @@
-package com.keyanpai.esInterface;
+package com.keyanpai.es;
 
 import java.util.HashMap;
 

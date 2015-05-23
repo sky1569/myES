@@ -1,4 +1,4 @@
-package com.keyanpai.dbImp;
+package com.keyanpai.db;
 
 import java.io.IOException;
 import java.sql.DriverManager;
@@ -17,9 +17,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.joda.time.DateTime;
 
-import com.keyanpai.dbInterface.DBService;
-import com.keyanpai.esImp.ESControlImp;
-import com.keyanpai.instance.DBConfigure;
+import com.keyanpai.es.ESControlImp;
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
 

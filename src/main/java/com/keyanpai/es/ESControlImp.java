@@ -1,4 +1,4 @@
-package com.keyanpai.esImp;
+package com.keyanpai.es;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,9 +28,11 @@ import org.joda.time.DateTime;
 
 
 
-import com.keyanpai.esInterface.ESControl;
-import com.keyanpai.instance.MySearchOption;
-import com.keyanpai.instance.MySearchOption.SearchLogic;
+
+
+
+
+import com.keyanpai.es.MySearchOption.SearchLogic;
 
 public class ESControlImp implements ESControl{
 

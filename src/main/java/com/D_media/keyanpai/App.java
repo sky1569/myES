@@ -6,17 +6,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.keyanpai.account.adminAccount;
-import com.keyanpai.dbImp.DBServiceImp;
-import com.keyanpai.esImp.ESControlImp;
-import com.keyanpai.esImp.ESSearchImp;
-import com.keyanpai.escontent.cnkiContent;
-import com.keyanpai.instance.DBConfigure;
-import com.keyanpai.instance.ESClient;
-import com.keyanpai.instance.MySearchOption;
-import com.keyanpai.instance.MySearchOption.DataFilter;
-import com.keyanpai.instance.MySearchOption.SearchLogic;
-import com.keyanpai.instance.MySearchOption.SearchType;
+import com.keyanpai.account.AdminAccount;
+import com.keyanpai.db.DBConfigure;
+import com.keyanpai.db.DBServiceImp;
+import com.keyanpai.es.ESClient;
+import com.keyanpai.es.ESControlImp;
+import com.keyanpai.es.ESSearchImp;
+import com.keyanpai.es.MySearchOption;
+import com.keyanpai.es.MySearchOption.DataFilter;
+import com.keyanpai.es.MySearchOption.SearchLogic;
+import com.keyanpai.es.MySearchOption.SearchType;
+import com.keyanpai.escontent.CnkiContent;
 
 
 
@@ -32,14 +32,14 @@ public class App
     {
         System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
         System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
-        adminAccount aa = new adminAccount("1","localhost","sky","1206");
+        AdminAccount aa = new AdminAccount("1","localhost","sky","1206");
         
        ESSearch(aa);
       // ESDelete(aa);
       // ESInsert(aa);
       //   ESUpdate(aa);
     }
-    private static void ESUpdate(adminAccount aa){
+    private static void ESUpdate(AdminAccount aa){
     	 List<String> clusterList = new ArrayList<String>();
     	 clusterList.add("10.107.6.82:9300");
     	  String[] indexNames = new String[] {     	        	
@@ -54,7 +54,7 @@ public class App
     	  aa.update(clusterList, indexNames[0], indexType, _id, newContentMap);
     }
     
-    private static void ESDelete(  adminAccount aa){	
+    private static void ESDelete(  AdminAccount aa){	
     	
     	 List<String> clusterList = new ArrayList<String>();
     	 clusterList.add("10.107.6.82:9300");
@@ -67,7 +67,7 @@ public class App
     	  aa.bulkDelete(clusterList, indexNames, contentMap);
     	 
     }
-    private static void ESInsert( adminAccount aa){   	 
+    private static void ESInsert( AdminAccount aa){   	 
     	List<String> clusterList = new ArrayList<String>();
     	//一个集群
         clusterList.add("10.107.6.82:9300"); 
@@ -112,7 +112,7 @@ public class App
  		aa.bulkInsertFromMysql(clusterList, dbC);
     }
     
-    private static void ESSearch( adminAccount aa) {
+    private static void ESSearch( AdminAccount aa) {
     	List<String> clusterList = new ArrayList<String>();
     	//一个集群
         clusterList.add("10.107.6.82:9300"); 

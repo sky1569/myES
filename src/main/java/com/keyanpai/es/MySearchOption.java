@@ -1,4 +1,4 @@
-package com.keyanpai.instance;
+package com.keyanpai.es;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;

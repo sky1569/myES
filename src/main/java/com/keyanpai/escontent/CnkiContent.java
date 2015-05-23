@@ -1,7 +1,7 @@
 package com.keyanpai.escontent;
 
 
-public class cnkiContent extends ESContent{
+public class CnkiContent extends ESContent{
 
 	public void setTableSimple()
 	{
