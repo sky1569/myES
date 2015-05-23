@@ -6,17 +6,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.joda.time.DateTime;
+
+
+
+
 
 
 
@@ -271,11 +277,39 @@ public class ESControlImp implements ESControl{
 	
 	
 	
-	public boolean update(String indexName,
+	public boolean update(String[] indexNames,
 			HashMap<String, Object[]> oldContentMap,
 			HashMap<String, Object[]> newContentMap) {
 		// TODO Auto-generated method stub
+		
 		return false;
 	}
-
+//根据内容_id进行局部字段更新
+	public boolean update(String indexName,String indexType,String _id,HashMap<String,Object[]> newContentMap) throws InterruptedException, ExecutionException{
+		UpdateRequest updateRequest = new UpdateRequest(indexName,indexType,_id);
+		try {
+			XContentBuilder xc = XContentFactory.jsonBuilder().startObject();
+			for (Entry<String,Object[]> colunm : newContentMap.entrySet()) {
+				Object[] ob = colunm.getValue();
+				String field = colunm.getKey();
+				if(1 == ob.length)
+				{
+					xc.field(field, ob[0]);
+				}
+				else if(1 < ob.length)
+				{
+				   xc.array(field, ob);
+				}
+			}
+			xc.endObject();
+			updateRequest.doc(xc);	
+				this.ESClient.update(updateRequest).get();		
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return true;
+	}
 }

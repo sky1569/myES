@@ -7,8 +7,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import com.keyanpai.dbImp.DBServiceImp;
-import com.keyanpai.esImp.ESControlImp;
+
 import com.keyanpai.esImp.ESSearchImp;
 import com.keyanpai.instance.ESClient;
 import com.keyanpai.instance.MySearchOption.SearchLogic;
@@ -16,20 +15,8 @@ import com.keyanpai.instance.MySearchOption.SearchLogic;
 public class guestAccount extends account{
 	private ESClient esClient = new ESClient();	
 	private ESSearchImp esSearchImp = new ESSearchImp();	
-	private Logger logger = Logger.getLogger(adminAccount.class);
-	
-	public guestAccount(String id
-					   ,String ip
-					   ,String name
-					   ,String password
-					   )
-	{
-		this.setId(id);
-		this.setIp(ip);
-		this.setName(name);
-		this.setPassword(password);
-		this.setAccountType();
-		PropertyConfigurator.configure("../com.D-media.keyanpai/log4j.properties") ;
+		
+	public guestAccount( ){
 	}	
 	
 	private void getClientClosed() {
@@ -55,5 +42,5 @@ public class guestAccount extends account{
 				indexNames, searchContentMap, searchLogic, filterContentMap, filterLogic, from, offset, sortField, sortType);
 		this.getClientClosed();
 		return rs;
-	}
+	}	
 }

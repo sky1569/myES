@@ -33,9 +33,25 @@ public class App
         System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
         System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
         adminAccount aa = new adminAccount("1","localhost","sky","1206");
-      // ESSearch(aa);
-       ESDelete(aa);
+        
+       ESSearch(aa);
+      // ESDelete(aa);
       // ESInsert(aa);
+      //   ESUpdate(aa);
+    }
+    private static void ESUpdate(adminAccount aa){
+    	 List<String> clusterList = new ArrayList<String>();
+    	 clusterList.add("10.107.6.82:9300");
+    	  String[] indexNames = new String[] {     	        	
+    	        		 "cnki-1-2015-05-23"    	        	
+    	        		};
+    	  String indexType = "paper";
+    	  String[] value = new String[] {"北京邮电大学","倪尧天","estest"};
+    	  String field = "keywords_name";
+    	  String _id = "AU1_NpqJmPZGBB7kwM95";
+    	  HashMap<String,Object[]> newContentMap = new HashMap<String,Object[]>();
+    	  newContentMap.put(field, value);
+    	  aa.update(clusterList, indexNames[0], indexType, _id, newContentMap);
     }
     
     private static void ESDelete(  adminAccount aa){	
@@ -104,9 +120,9 @@ public class App
         String[] type = new String[] {"paper"};   
         
         String[] indexNames = new String[] { 
-        	//	"cnki-1-2015-05-20"
-        		 "beiyou-1-2015-05-13"
-        		,"beiyou-1-2015-05-14" 
+        		"cnki-1-2015-05-23"
+//        		 "beiyou-1-2015-05-13"
+//        		,"beiyou-1-2015-05-14" 
         		};
 
          
@@ -118,7 +134,7 @@ public class App
          
          
          
-     	String searchField1 = "journal_year";    
+     	String searchField1 = "keywords_name";    
      	
          SearchType searchType1 = SearchType.range;
          SearchLogic searchLogic1 = SearchLogic.must;
@@ -132,7 +148,7 @@ public class App
         
          Object[] searchValue1 = new Object[] {2011,2015,ms1};
      	
-         String searchField2= "name";       
+         String searchField2= "keywords_name";       
          
          SearchType searchType2 = SearchType.querystring;
          SearchLogic searchLogic2 = SearchLogic.must;
@@ -143,7 +159,7 @@ public class App
          
          MySearchOption ms2 = new MySearchOption(searchType2,searchLogic2
          		,queryStringPrecision2,dataFilter2,boost2,highlight2);
-         Object[] searchValue2 = new Object[]{"中国","农村",ms2};       
+         Object[] searchValue2 = new Object[]{"北京邮电大学","倪尧天",ms2};       
          
          
          String searchField3 = "abstracts";
@@ -167,7 +183,7 @@ public class App
         	 
         
         	
-         searchContentMap.put(searchField1, searchValue1);
+     //    searchContentMap.put(searchField1, searchValue1);
  		searchContentMap.put(searchField2, searchValue2);
  	//	searchContentMap.put(searchField3, searchValue3);
      

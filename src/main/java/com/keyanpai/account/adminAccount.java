@@ -3,15 +3,14 @@ package com.keyanpai.account;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-
 import com.keyanpai.dbImp.DBServiceImp;
 import com.keyanpai.esImp.ESControlImp;
 import com.keyanpai.esImp.ESSearchImp;
-
 import com.keyanpai.instance.DBConfigure;
 import com.keyanpai.instance.ESClient;
 import com.keyanpai.instance.MySearchOption.SearchLogic;
@@ -150,10 +149,31 @@ public class adminAccount extends account {
 //	System.out.println(this.getName()+":comment!");
 //}
 
-//	public void update()
-//　　{
-//	System.out.println(this.getName()+":update!");		
-//}
+	public boolean update(
+			List<String> clusterList,String indexName
+			,String indexType,String _id,HashMap<String ,Object[]> newContentMap)
+	{
+		System.out.println(this.getName()+":update!");		
+		this.getClientConn(clusterList);
+		this.esControlImp.controlConfigure(this.esClient.getClient());
+		try {
+			this.esControlImp.update(indexName, indexType, _id, newContentMap);
+			
+			return true;
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally
+		{
+			this.getClientClosed();
+		}
+		return false;
+	
+	}
 	
 
 }

@@ -6,12 +6,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.elasticsearch.client.Client;
 
-import com.keyanpai.dbImp.DBServiceImp;
-import com.keyanpai.esImp.ESControlImp;
 import com.keyanpai.esImp.ESSearchImp;
-import com.keyanpai.esInterface.ESSearch;
 import com.keyanpai.instance.ESClient;
 import com.keyanpai.instance.MySearchOption.SearchLogic;
 
@@ -20,7 +16,6 @@ import com.keyanpai.instance.MySearchOption.SearchLogic;
 public class userAccount extends account {
 	private ESClient esClient = new ESClient();
 	private ESSearchImp esSearchImp = new ESSearchImp();
-
 	private Logger logger = Logger.getLogger(adminAccount.class);
 	
 	public userAccount(String id  ,String ip

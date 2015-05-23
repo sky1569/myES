@@ -44,7 +44,7 @@ public interface ESControl {
 	 * @return
 	 */
 	boolean update(
-			String indexName ,HashMap<String ,Object[]>oldContentMap,HashMap<String,Object[]>newContentMap);
+			String[] indexName ,HashMap<String ,Object[]>oldContentMap,HashMap<String,Object[]>newContentMap);
 	//public boolean delete();
 	
 }
