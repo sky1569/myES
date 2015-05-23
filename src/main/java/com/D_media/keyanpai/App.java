@@ -43,8 +43,7 @@ public class App
     	 List<String> clusterList = new ArrayList<String>();
     	 clusterList.add("10.107.6.82:9300");
     	  String[] indexNames = new String[] {     	        	
-    	        		 "cnki-2-2015-05-23"
-    	        		//,"beiyou-1-2015-05-14" 
+    	        		 "cnki-2-2015-05-23"    	        	
     	        		};
     	 String[] value = new String[]{"北京大学"};
     	 HashMap<String,Object[]> contentMap = new HashMap<String,Object[]>();
