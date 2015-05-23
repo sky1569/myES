@@ -18,7 +18,27 @@ public class DBConfigure {
 	private Map<String,String> tableSimpleNames;
 	private Map<String,String> tableComplexNames;
 	private String uniqFieldName;
-	
+	private String indexId;
+	private String indexName;
+	private String indexType;
+	public String getIndexName() {
+		return indexName;
+	}
+	public void setIndexName(String indexName) {
+		this.indexName = indexName;
+	}
+	public String getIndexType() {
+		return indexType;
+	}
+	public void setIndexType(String indeType) {
+		this.indexType = indeType;
+	}
+	public String getIndexId() {
+		return indexId;
+	}
+	public void setIndexId(String indexId) {
+		this.indexId = indexId;
+	}
 	public String getUniqFieldName() {
 		return uniqFieldName;
 	}

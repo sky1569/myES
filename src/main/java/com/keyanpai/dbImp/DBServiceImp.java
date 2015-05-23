@@ -23,23 +23,23 @@ import com.keyanpai.instance.DBConfigure;
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
 
-public class dbServiceImp implements DBService{
-	private static dbServiceImp ds = null;
+public class DBServiceImp implements DBService{
+	private static DBServiceImp ds = null;
 	private DBConfigure dbC;
 	private Connection conn;
 	private Statement stmt,stmt2,stmtMax;
-	private Logger logger = Logger.getLogger(dbServiceImp.class);
+	private Logger logger = Logger.getLogger(DBServiceImp.class);
 	//private int maxRecoder = 4000;
 
-	public static dbServiceImp  getDBServiceImp()	{
+	public static DBServiceImp  getDBServiceImp()	{
 		if(ds == null)
 		{			
-			ds = new dbServiceImp();
+			ds = new DBServiceImp();
 		}
 		return ds;
 	}
 
-	private dbServiceImp(){
+	private DBServiceImp(){
 		
 		PropertyConfigurator.configure("/home/sky/workspace/com.D-media.keyanpai/log4j.properties") ;
 	}
@@ -82,7 +82,7 @@ public class dbServiceImp implements DBService{
 				for (int i = 0; i < queryPerid; i++) {	
 					List<XContentBuilder> dataList = _getTablesData(
 							this.dbC.getPriTableName(),this.dbC.getTableSimpleNames(),this.dbC.getTableComplexNames(),this.dbC.getUniqFieldName(), columns, i,columnsComplex);
-						esControlImp.bulkInsert(dataList,"1", "cnki", "paper");
+						esControlImp.bulkInsert(dataList,this.dbC.getIndexId(), this.dbC.getIndexName(), this.dbC.getIndexType());
 							System.out.println(i +":"+  DateTime.now());
 							
 				}

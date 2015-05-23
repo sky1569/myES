@@ -4,71 +4,133 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.client.Client;
-import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
-import com.keyanpai.esInterface.ESControl;
-import com.keyanpai.esInterface.ESSearch;
+
+import com.keyanpai.dbImp.DBServiceImp;
+import com.keyanpai.esImp.ESControlImp;
+import com.keyanpai.esImp.ESSearchImp;
+
+import com.keyanpai.instance.DBConfigure;
 import com.keyanpai.instance.ESClient;
 import com.keyanpai.instance.MySearchOption.SearchLogic;
-import com.keyanpai.userInterface.UserControl;
 
-public class adminAccount extends account implements ESControl,UserControl,ESSearch{
-	private ESClient esClient;
 
+public class adminAccount extends account {//implements ESControl,UserControl,ESSearch{
+	private ESClient esClient = new ESClient();
+	private ESControlImp esControlImp = ESControlImp.getInstance();
+	private ESSearchImp esSearchImp = new ESSearchImp();
+	private DBServiceImp dbServiceImp = DBServiceImp.getDBServiceImp();
+	private Logger logger = Logger.getLogger(adminAccount.class);
 	
-	public ESClient getClient(List<String> clusterList)
+	public adminAccount(String id
+					   ,String ip
+					   ,String name
+					   ,String password
+					   )
 	{
-		esClient = new ESClient(clusterList);
-		return this.esClient;
-	}
+		this.setId(id);
+		this.setIp(ip);
+		this.setName(name);
+		this.setPassword(password);
+		this.setAccountType();
+		PropertyConfigurator.configure("../com.D-media.keyanpai/log4j.properties") ;
+	}	
 	
-	public boolean controlConfigure(Client esClient) {
+	private void getClientClosed() {
 		// TODO Auto-generated method stub
-		return false;
+		this.esClient.destroy();		
 	}
 
-	public boolean bulkInsert(List<XContentBuilder> dataList, String index_id,
-			String index_name, String index_type) {
+	private void getClientConn(List<String> clusterList) {
 		// TODO Auto-generated method stub
+		this.esClient.ESClientConfigure(clusterList);
+		this.esClient.clientConn();
+	}
+
+	public boolean bulkInsertFromMysql(List<String> clusterList,DBConfigure dbConfigure){
+		try{
+			this.getClientConn(clusterList);
+			this.esControlImp.controlConfigure(this.esClient.getClient());
+			this.dbServiceImp.DBSetter(dbConfigure);
+			this.dbServiceImp.open();
+			this.dbServiceImp.handlData(this.esControlImp);	
+			this.dbServiceImp.close();
+			this.getClientClosed();
+			return true;
+		}
+		catch(Exception e)
+		{
+			this.logger.error(e.getMessage());
+		}
 		return false;
+
 	}	
 
-	public boolean bulkUpdate(String indexName,
+
+   public boolean bulkUpdate(List<String> clusterList,String indexName,
 			HashMap<String, Object[]> oldContentMap,
 			HashMap<String, Object[]> newContentMap) {
+		// TODO Auto-generated method stub	
+	     try{
+			   this.getClientConn(clusterList);
+			   this.esControlImp.controlConfigure(this.esClient.getClient());
+			   this.esControlImp.setESSeachImp(this.esSearchImp);
+			   this.esControlImp.bulkUpdate(indexName, oldContentMap, newContentMap);
+			   this.getClientClosed();
+			   return true;
+		    }
+			catch(Exception e)
+			{
+				this.logger.error(e.getMessage());
+			}
+			return false;
+			}
+
+	public boolean bulkDelete(List<String> clusterList,String[] indexName,
+			HashMap<String, Object[]> contentMap) {
 		// TODO Auto-generated method stub
+		try{
+			this.getClientConn(clusterList);
+			this.esControlImp.controlConfigure(this.esClient.getClient());
+			this.esControlImp.setESSeachImp(this.esSearchImp);
+			this.esControlImp.bulkDelete(indexName, contentMap);
+			this.getClientClosed();
+			return false;
+			}
+		catch(Exception e)
+		{
+			this.logger.error(e.getMessage());
+		}
 		return false;
 	}
+	
 
-	public boolean update(String indexName,
-			HashMap<String, Object[]> oldContentMap,
-			HashMap<String, Object[]> newContentMap) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public boolean searchConfigure(Client esClient) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public List<Map<String, Object>> simpleSearch(String[] indexNames,
+	public List<Map<String, Object>> search(List<String> clusterList,String[] indexNames,
 			HashMap<String, Object[]> searchContentMap,
 			SearchLogic searchLogic,
 			HashMap<String, Object[]> filterContentMap,
 			SearchLogic filterLogic, int from, int offset, String sortField,
 			String sortType) {
 		// TODO Auto-generated method stub
-		return null;
+		this.getClientConn(clusterList);		
+		this.esSearchImp.searchConfigure(this.esClient.getClient());		
+		List<Map<String, Object>> rs = this.esSearchImp.simpleSearch(indexNames, searchContentMap, searchLogic, filterContentMap, filterLogic, from, offset, sortField, sortType);
+		this.getClientClosed();
+		return rs;
 	}
 
-	public long getCount(String[] indexNames,
+	public long getCount(List<String> clusterList,String[] indexNames,
 			HashMap<String, Object[]> searchContentMap,
 			SearchLogic searchLogic,
 			HashMap<String, Object[]> filterContentMap, SearchLogic filterLogic) {
 		// TODO Auto-generated method stub
-		return 0;
+		this.getClientConn(clusterList);		
+		this.esSearchImp.searchConfigure(this.esClient.getClient());		
+		long rs = this.esSearchImp.getCount(indexNames, searchContentMap, searchLogic, filterContentMap, filterLogic);
+		this.getClientClosed();
+		return rs;
 	}
 
 	public List<Map<String, Object>> getSuggest(String[] indexNames,
@@ -77,10 +139,6 @@ public class adminAccount extends account implements ESControl,UserControl,ESSea
 		return null;
 	}
 
-	public boolean bulkDelete(String[] indexName,
-			HashMap<String, Object[]> contentMap) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+
 
 }

@@ -16,24 +16,21 @@ public class ESClient {
 	private Client ESClient = null;
 	/*设置参数*/
 	private List<String> clusterList = null;
-//	private String[] indexName;
-//	private String[] indexType;	
+
 	private Logger logger = Logger.getLogger(ESClient.class);	
-	public ESClient(List<String> clusterList
-			//,	String[] indexName, String[] indexType
-			){		
-		
+	public ESClient(){}
+
+
+	public void ESClientConfigure(List<String> clusterList)
+	{
 		try{
 			PropertyConfigurator.configure("../com.D-media.keyanpai/log4j.properties") ;
-			this.clusterList = clusterList;
-//			this.indexName = indexName;
-//			this.indexType = indexType;			
+			this.clusterList = clusterList;		
 		}
 		catch(Exception e){
 			this.logger.error(e.getMessage());
 		}
 	}
-
 	/*连接关闭操作*/
 	public boolean  clientConn()  {
         this.logger.info("连接搜索服务器");	    	
@@ -95,7 +92,7 @@ public class ESClient {
 	
 	
 	
-	public Client getESClient()
+	public Client getClient()
 	{
 	
 		return this.ESClient;
