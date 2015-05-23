@@ -36,14 +36,14 @@ public class App
     	//一个集群
         clusterList.add("10.107.6.82:9300"); 
         ESClient esClient = new ESClient(clusterList);
-        DBInsert(esClient);
+       // DBInsert(esClient);
         
 //        cnkiContent cc = new cnkiContent();
 //        cc.setDatabaseName("cnki_2015_0419");
 //        cc.setPriTableName("tb_cnki");
 //        cc.setUniqFieldName("uniq_id");
         
-    	
+        ESDelete(esClient);
     }
     
     private static void ESDelete( ESClient esClient){
@@ -51,10 +51,20 @@ public class App
     	 ESControlImp esControlImp = ESControlImp.getInstance();
     	 esClient.clientConn();
     	 esControlImp.controlConfigure(esClient.getESClient());
-    	 String[] indexName = new String[]{"cnki-1-2015-05-23"};
-    	 HashMap<String,Object[]> contentMap = new HashMap<String,Object[]>();
+    	 ESSearchImp esSearchImp = new ESSearchImp();
+    	// esSearchImp.searchConfigure(esClient.getESClient());
     	 
+    	 
+    	 String[] indexName = new String[]{"cnki-1-2015-05-23"};
+    	 String[] value = new String[]{"基于物种间"};
+    	 HashMap<String,Object[]> contentMap = new HashMap<String,Object[]>();
+    	 contentMap.put("name",value);    	 
+    	 
+    	
+    	 esControlImp.setESSeachImp(esSearchImp);
     	 esControlImp.bulkDelete(indexName, contentMap);
+    	
+    	 esClient.destroy();
     	 
     }
     private static void DBInsert( ESClient esClient){

@@ -13,8 +13,8 @@ public interface ESControl {
 	 * @param esClient
 	 * @return
 	 */
-	boolean controlConfigure(
-			Client esClient);
+//	boolean controlConfigure(
+//			Client esClient);
 	/**
 	 * 
 	 * @param dataList

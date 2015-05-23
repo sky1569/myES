@@ -9,11 +9,20 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import com.keyanpai.esInterface.ESControl;
 import com.keyanpai.esInterface.ESSearch;
+import com.keyanpai.instance.ESClient;
 import com.keyanpai.instance.MySearchOption.SearchLogic;
 import com.keyanpai.userInterface.UserControl;
 
 public class adminAccount extends account implements ESControl,UserControl,ESSearch{
+	private ESClient esClient;
 
+	
+	public ESClient getClient(List<String> clusterList)
+	{
+		esClient = new ESClient(clusterList);
+		return this.esClient;
+	}
+	
 	public boolean controlConfigure(Client esClient) {
 		// TODO Auto-generated method stub
 		return false;

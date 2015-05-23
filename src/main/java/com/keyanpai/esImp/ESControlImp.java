@@ -60,6 +60,7 @@ public class ESControlImp implements ESControl{
 	public void setESSeachImp(ESSearchImp esSearchImp)
 	{
 		this.esSearchImp = esSearchImp;
+		this.esSearchImp.searchConfigure(ESClient);
 	}
 	
 	

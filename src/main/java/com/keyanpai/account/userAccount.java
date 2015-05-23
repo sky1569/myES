@@ -9,12 +9,12 @@ import org.elasticsearch.client.Client;
 import com.keyanpai.esImp.ESSearchImp;
 import com.keyanpai.esInterface.ESSearch;
 import com.keyanpai.instance.MySearchOption.SearchLogic;
-import com.keyanpai.userInterface.UserControl;
-import com.keypai.userImp.UserControlImp;
+
+
 
 public class userAccount extends account implements ESSearch{
 
-	private UserControlImp userControlImp;
+
 	private ESSearchImp esSearchImp;
 	public userAccount(){
 		

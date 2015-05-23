@@ -17,8 +17,8 @@ public interface ESSearch {
 	 * @param indexType
 	 * @return
 	 */
-	 boolean searchConfigure(
-			 Client esClient);
+//	 boolean searchConfigure(
+//			 Client esClient);
 	
 	/**
 	 * 
