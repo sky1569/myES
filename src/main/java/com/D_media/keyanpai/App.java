@@ -30,7 +30,7 @@ public class App
     public static void main( String[] args ) 
     {
         System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
-        
+        System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
        	List<String> clusterList = new ArrayList<String>();
     	//一个集群
         clusterList.add("10.107.6.82:9300"); 
