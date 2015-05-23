@@ -23,6 +23,9 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryFilterBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.facet.FacetBuilders;
+import org.elasticsearch.search.facet.terms.TermsFacet;
+import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 
 import com.keyanpai.esInterface.ESSearch;
 import com.keyanpai.instance.MySearchOption;
@@ -388,6 +391,54 @@ try{
 		return null;
 	}
 	
+	
+	 private Map<String, String> _group(String indexName, QueryBuilder queryBuilder, String[] groupFields) {
+	        try {
+	            TermsFacetBuilder termsFacetBuilder = FacetBuilders.termsFacet("group").fields(groupFields).size(9999);
+	            SearchRequestBuilder searchRequestBuilder = this.ESClient.prepareSearch(indexName).setSearchType(SearchType.DEFAULT)
+	                    .addFacet(termsFacetBuilder).setQuery(queryBuilder).setFrom(0).setSize(1).setExplain(true);
+	            this.logger.debug(searchRequestBuilder.toString());
+	            SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
+	            TermsFacet termsFacet = searchResponse.getFacets().facet("group");
+	            HashMap<String, String> result = new HashMap<String, String>();
+	            for (org.elasticsearch.search.facet.terms.TermsFacet.Entry entry : termsFacet.getEntries()) {
+	                result.put(entry.getTerm()+"", entry.getCount()+"");
+	            }
+	            return result;
+	        }
+	        catch (Exception e) {
+	            this.logger.error(e.getMessage());
+	        }
+	        return null;
+	    }
+
+	    public Map<String, String> group(String indexName
+	            , HashMap<String, Object[]> mustSearchContentMap
+	            , HashMap<String, Object[]> shouldSearchContentMap
+	            , String[] groupFields) {
+	        /*创建must搜索条件*/
+	        QueryBuilder mustQueryBuilder = this.createQueryBuilder(mustSearchContentMap, SearchLogic.must);
+	        /*创建should搜索条件*/
+	        QueryBuilder shouldQueryBuilder = this.createQueryBuilder(shouldSearchContentMap, SearchLogic.should);
+	        if (mustQueryBuilder == null && shouldQueryBuilder == null) {
+	            return null;
+	        }
+	        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+	        if (mustQueryBuilder != null) {
+	            boolQueryBuilder = boolQueryBuilder.must(mustQueryBuilder);
+	        }
+	        if (shouldQueryBuilder != null) {
+	            boolQueryBuilder = boolQueryBuilder.must(shouldQueryBuilder);
+	        }
+	        try {
+	            return this._group(indexName, boolQueryBuilder, groupFields);
+	        }
+	        catch (Exception e) {
+	            this.logger.error(e.getMessage());
+	        }
+	        return null;
+	    }
+
 	
 
 }

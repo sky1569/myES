@@ -60,4 +60,16 @@ public interface ESSearch {
 	 */
 	List<Map<String ,Object> > getSuggest(
 			String[] indexNames,String filedName,String value,int count); 
+	/**
+	 * 
+	 * @param indexName
+	 * @param mustSearchContentMap
+	 * @param shouldSearchContentMap
+	 * @param groupFields
+	 * @return
+	 */
+    Map<String, String> group(String indexName
+	            , HashMap<String, Object[]> mustSearchContentMap
+	            , HashMap<String, Object[]> shouldSearchContentMap
+	            , String[] groupFields);
 }

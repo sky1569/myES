@@ -17,7 +17,7 @@ import com.keyanpai.instance.ESClient;
 import com.keyanpai.instance.MySearchOption.SearchLogic;
 
 
-public class adminAccount extends account {//implements ESControl,UserControl,ESSearch{
+public class adminAccount extends account {
 	private ESClient esClient = new ESClient();
 	private ESControlImp esControlImp = ESControlImp.getInstance();
 	private ESSearchImp esSearchImp = new ESSearchImp();
@@ -116,7 +116,8 @@ public class adminAccount extends account {//implements ESControl,UserControl,ES
 		// TODO Auto-generated method stub
 		this.getClientConn(clusterList);		
 		this.esSearchImp.searchConfigure(this.esClient.getClient());		
-		List<Map<String, Object>> rs = this.esSearchImp.simpleSearch(indexNames, searchContentMap, searchLogic, filterContentMap, filterLogic, from, offset, sortField, sortType);
+		List<Map<String, Object>> rs = this.esSearchImp.simpleSearch(
+				indexNames, searchContentMap, searchLogic, filterContentMap, filterLogic, from, offset, sortField, sortType);
 		this.getClientClosed();
 		return rs;
 	}
@@ -139,6 +140,20 @@ public class adminAccount extends account {//implements ESControl,UserControl,ES
 		return null;
 	}
 
+//	public void up(){
+//	System.out.println(this.getName()+":up!");
+//}
+//	public void down(){
+//	System.out.println(this.getName()+":down!");
+//}
+//	public void comment(){
+//	System.out.println(this.getName()+":comment!");
+//}
 
+//	public void update()
+//　　{
+//	System.out.println(this.getName()+":update!");		
+//}
+	
 
 }
