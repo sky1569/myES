@@ -31,8 +31,7 @@ public class App
     public static void main( String[] args ) 
     {
         System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
-        System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
-        System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
+       
         adminAccount aa = new adminAccount("1","localhost","sky","1206");
       // ESSearch(aa);
        ESDelete(aa);
