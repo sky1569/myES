@@ -1,4 +1,4 @@
-package com.keyanpai.es;
+package com.keyanpai.es.search;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,46 +21,28 @@ import org.elasticsearch.index.query.NotFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryFilterBuilder;
-import org.elasticsearch.index.query.QueryStringQueryBuilder;
+
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.elasticsearch.search.facet.terms.TermsFacetBuilder;
 
+import com.keyanpai.es.MySearchOption;
 import com.keyanpai.es.MySearchOption.DataFilter;
 import com.keyanpai.es.MySearchOption.SearchLogic;
 
 
-public class ESSearchImp implements ESSearch{
+public class ESSearchImp {
 	
 	private Client ESClient = null;
 	private Logger logger = Logger.getLogger(ESSearchImp.class);	
-	public ESSearchImp(){		
+	public ESSearchImp(Client ESClient){	
+		this.ESClient = ESClient;
 		PropertyConfigurator.configure("../com.D-media.keyanpai/log4j.properties") ;
 	}	
+	private ESCreatQueryBuilder esCreatQueryBuilder = new  ESCreatQueryBuilder();
 	
-	public boolean searchConfigure(Client esClient) {
-		// TODO Auto-generated method stub
-		try{
-			this.ESClient = esClient;
-			return true;
-		}
-		catch(Exception e){
-			this.logger.error(e.getMessage());
-		}
-		return false;
-	}	
-	
-	public List<Map<String, Object>> simpleSearch(String[] indexNames,
-			HashMap<String, Object[]> searchContentMap,
-			HashMap<String, Object[]> filterContentMap, int from, int offset,
-			 String sortField, String sortType) {
-		// TODO Auto-generated method stub
-		SearchLogic searchLogic = indexNames.length > 1 ? SearchLogic.should : SearchLogic.must;
-		return this.simpleSearch(
-				indexNames, searchContentMap, searchLogic, filterContentMap
-				, searchLogic, from, offset, sortField, sortType);
-	}
+
 	public List<Map<String, Object>> simpleSearch(String[] indexNames,
 			HashMap<String, Object[]> searchContentMap,
 			SearchLogic searchLogic,
@@ -74,9 +56,10 @@ public class ESSearchImp implements ESSearch{
 		}
 		try{
 			QueryBuilder queryBuilder = null;
-			queryBuilder = this.createQueryBuilder(searchContentMap,searchLogic);
+			queryBuilder = this.esCreatQueryBuilder.createQueryBuilder(searchContentMap,searchLogic);
 			queryBuilder = this.createFilterBuilder(filterLogic,queryBuilder,searchContentMap
 					,filterContentMap);
+			this.ESClient.admin().cluster().prepareClusterStats().execute().actionGet();
 			SearchRequestBuilder searchRequestBuilder = this.ESClient.prepareSearch(indexNames)
 					.setSearchType(SearchType.DEFAULT).setQuery( queryBuilder).setFrom(from)
 					.setSize(offset).setExplain(true);
@@ -148,7 +131,7 @@ public class ESSearchImp implements ESSearch{
 			HashMap<String, Object[]> searchContentMap,
 			HashMap<String, Object[]> filterContentMap) {
 		// TODO Auto-generated method stub
-try{
+		try{
 			
 			Iterator<Entry<String,Object[]>> iterator = searchContentMap.entrySet().iterator();
 			AndFilterBuilder andFilterBuilder = null;
@@ -177,7 +160,7 @@ try{
 		     /*构造过滤条件*/
 			//System.out.println("filterContentMap != null");
 			QueryFilterBuilder queryFilterBuilder = FilterBuilders				
-					.queryFilter(this.createQueryBuilder(filterContentMap, filterLogic));
+					.queryFilter(this.esCreatQueryBuilder.createQueryBuilder(filterContentMap, filterLogic));
 			/*构造not过滤条件，表示搜索结果不包含这些内容，而不是不过滤*/
 		    NotFilterBuilder notFilterBuilder = FilterBuilders.notFilter(queryFilterBuilder);
 			return QueryBuilders.filteredQuery(
@@ -192,125 +175,6 @@ try{
 		
 		
 		return null;
-	}
-
-	public QueryBuilder createQueryBuilder(
-			HashMap<String, Object[]> searchContentMap, SearchLogic searchLogic) {
-		// TODO Auto-generated method stub
-		try{
-			if(searchContentMap == null || searchContentMap.size() == 0){
-				return null;				
-			}
-			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-			Iterator<Entry<String,Object[]>> iterator = searchContentMap.entrySet().iterator();
-			/*循环每一个需要搜索的字段和值*/
-			while(iterator.hasNext()){
-				Entry<String,Object[]> entry = iterator.next();
-				String field =entry.getKey();			
-				Object[] values = entry.getValue();		
-				/*排除非法的搜索值*/
-				if(!this.checkValue(values)){
-					continue;
-				}
-				MySearchOption mySearchOption = this.getSearchOption(values);			
-				
-				QueryBuilder queryBuilder = this.createSingleFieldQueryBuilder(
-						field, values, mySearchOption);
-				if(queryBuilder != null)				{
-					if(searchLogic == SearchLogic.should){
-						boolQueryBuilder = boolQueryBuilder.should(queryBuilder);
-					}
-					else{
-						boolQueryBuilder = boolQueryBuilder.must(queryBuilder);
-					}
-				}
-			}
-			return boolQueryBuilder;
-		}
-		catch(Exception e){
-			 this.logger.error(e.getMessage());
-		}
-			
-		return null;
-	}
-
-	private QueryBuilder createSingleFieldQueryBuilder(String field,
-			Object[] values, MySearchOption mySearchOption) {
-		// TODO Auto-generated method stub
-		try{
-			if(mySearchOption.getSearchType() 
-					== com.keyanpai.es.MySearchOption.SearchType.range)
-				return this.createRangeQueryBuilder(field,values);
-			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-			 for (Object valueItem : values) {
-				 if (valueItem instanceof MySearchOption) {
-					 continue;
-				 }
-				 QueryBuilder queryBuilder = null;
-				 String formatValue = valueItem.toString().trim().replace("*", "");//格式化搜索数据
-		
-				 if (mySearchOption.getSearchType() 
-						 == com.keyanpai.es.MySearchOption.SearchType.term) {
-					 queryBuilder = QueryBuilders.termQuery(field, formatValue).boost(mySearchOption.getBoost());
-				 }
-				 else if (mySearchOption.getSearchType() 
-						 == com.keyanpai.es.MySearchOption.SearchType.querystring) {
-//					 if (formatValue.length() == 1) {
-//						 /*如果搜索长度为1的非数字的字符串，格式化为通配符搜索，暂时这样，以后有时间改成multifield搜索，就不需要通配符了*/
-//						 if (!Pattern.matches("[0-9]", formatValue)) {
-//							 formatValue = "*"+formatValue+"*";							
-//						 }
-//					 }
-					 QueryStringQueryBuilder queryStringQueryBuilder = QueryBuilders.queryStringQuery(formatValue)
-							 .minimumShouldMatch(mySearchOption.getQueryStringPrecision());
-					 queryBuilder = queryStringQueryBuilder.field(field).boost(mySearchOption.getBoost());
-					 
-				 }
-				 if (mySearchOption.getSearchLogic() == SearchLogic.should) {
-					   boolQueryBuilder = boolQueryBuilder.should(queryBuilder);
-				 }
-				 else{
-					 boolQueryBuilder = boolQueryBuilder.must(queryBuilder);
-				 }
-			 }
-			return boolQueryBuilder;
-		}
-		catch(Exception e)
-		{
-			 this.logger.error(e.getMessage());
-		}
-	return null;
-	}
-
-	private QueryBuilder createRangeQueryBuilder(String field, Object[] values) {
-		// TODO Auto-generated method stub
-		if(values.length == 1 || values[1] == null || values[1].toString().trim().isEmpty()){
-			this.logger.warn("[区间搜索]必须传递两个值，但是只传递了一个值，所以返回null");
-			return null;
-		}
-		boolean timeType = false;
-		if(MySearchOption.isDate(values[0]))
-		{
-			if(MySearchOption.isDate(values[1]))
-			{
-				timeType = true;
-			}
-		}
-		String begin = "",end = "";
-		if(timeType)
-		{
-			begin = MySearchOption.formatDate(values[0]);
-			
-			end = MySearchOption.formatDate(values[1]);
-		}
-		else
-		{
-			 begin = values[0].toString();
-			 System.out.println(field + begin);
-			 end = values[1].toString();
-			 System.out.println( field + end);
-		}
-		return QueryBuilders.rangeQuery(field).from(begin).to(end);
 	}
 
 	private MySearchOption getSearchOption(Object[] values) {
@@ -348,7 +212,7 @@ try{
 		// TODO Auto-generated method stub
 		QueryBuilder queryBuilder = null;
 		 try {
-			 queryBuilder = this.createQueryBuilder(searchContentMap, searchLogic);
+			 queryBuilder = this.esCreatQueryBuilder.createQueryBuilder(searchContentMap, searchLogic);
 			 queryBuilder = this.createFilterBuilder(searchLogic, queryBuilder, searchContentMap, filterContentMap);
 			 SearchResponse searchResponse = this.searchCountRequest(indexNames, queryBuilder);
 			 return searchResponse.getHits().totalHits();
@@ -415,9 +279,9 @@ try{
 	            , HashMap<String, Object[]> shouldSearchContentMap
 	            , String[] groupFields) {
 	        /*创建must搜索条件*/
-	        QueryBuilder mustQueryBuilder = this.createQueryBuilder(mustSearchContentMap, SearchLogic.must);
+	        QueryBuilder mustQueryBuilder = this.esCreatQueryBuilder.createQueryBuilder(mustSearchContentMap, SearchLogic.must);
 	        /*创建should搜索条件*/
-	        QueryBuilder shouldQueryBuilder = this.createQueryBuilder(shouldSearchContentMap, SearchLogic.should);
+	        QueryBuilder shouldQueryBuilder = this.esCreatQueryBuilder.createQueryBuilder(shouldSearchContentMap, SearchLogic.should);
 	        if (mustQueryBuilder == null && shouldQueryBuilder == null) {
 	            return null;
 	        }

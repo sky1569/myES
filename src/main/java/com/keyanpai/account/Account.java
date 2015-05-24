@@ -55,4 +55,5 @@ public class Account {
 		System.out.println("type _check():"+this.getId());		
 		return type.admin;
 	}
+
 }

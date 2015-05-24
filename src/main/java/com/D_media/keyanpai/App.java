@@ -9,13 +9,13 @@ import java.util.Map.Entry;
 import com.keyanpai.account.AdminAccount;
 import com.keyanpai.db.DBConfigure;
 import com.keyanpai.db.DBServiceImp;
-import com.keyanpai.es.ESClient;
-import com.keyanpai.es.ESControlImp;
-import com.keyanpai.es.ESSearchImp;
 import com.keyanpai.es.MySearchOption;
 import com.keyanpai.es.MySearchOption.DataFilter;
 import com.keyanpai.es.MySearchOption.SearchLogic;
 import com.keyanpai.es.MySearchOption.SearchType;
+import com.keyanpai.es.client.ESClientImp;
+import com.keyanpai.es.control.ESControlImp;
+import com.keyanpai.es.search.ESSearchImp;
 import com.keyanpai.escontent.CnkiContent;
 
 
@@ -33,44 +33,54 @@ public class App
         System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
         System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
         AdminAccount aa = new AdminAccount("1","localhost","sky","1206");
-        
-       ESSearch(aa);
-      // ESDelete(aa);
-      // ESInsert(aa);
-      //   ESUpdate(aa);
-    }
-    private static void ESUpdate(AdminAccount aa){
-    	 List<String> clusterList = new ArrayList<String>();
-    	 clusterList.add("10.107.6.82:9300");
-    	  String[] indexNames = new String[] {     	        	
-    	        		 "cnki-1-2015-05-23"    	        	
-    	        		};
-    	  String indexType = "paper";
-    	  String[] value = new String[] {"北京邮电大学","倪尧天","estest"};
-    	  String field = "keywords_name";
-    	  String _id = "AU1_NpqJmPZGBB7kwM95";
-    	  HashMap<String,Object[]> newContentMap = new HashMap<String,Object[]>();
-    	  newContentMap.put(field, value);
-    	  aa.update(clusterList, indexNames[0], indexType, _id, newContentMap);
+          List<String> clusterList = new ArrayList<String>();
+          clusterList.add("10.107.6.82:9300");
+          aa.getClientConn(clusterList);
+              // ESSearch(aa);
+
+              ESDelete(aa);
+           //   ESInsert(aa);
+            //  ESUpdate(aa);
+               aa.getClientClosed();
     }
     
-    private static void ESDelete(  AdminAccount aa){	
+    
+    private static void ESUpdate(final AdminAccount aa){
     	
-    	 List<String> clusterList = new ArrayList<String>();
-    	 clusterList.add("10.107.6.82:9300");
-    	  String[] indexNames = new String[] {     	        	
-    	        		 "cnki-2-2015-05-23"    	        	
+    	final  String[] indexNames = new String[] {     	        	
+    	        		 "cnki-1-2015-05-23"    	        	
     	        		};
-    	 String[] value = new String[]{"北京大学"};
+    	final String indexType = "paper";
+    	  String[] value = new String[] {"北京邮电大学","倪尧天","estest"};
+    	  String field = "keywords_name";
+    	  final String _id = "AU1_NpqJmPZGBB7kwM95";
+    	  final  HashMap<String,Object[]> newContentMap = new HashMap<String,Object[]>();
+    	  newContentMap.put(field, value);
+    	
+	  
+    	  new Thread(new Runnable(){
+
+			public void run() {
+				// TODO Auto-generated method stub
+				aa.getAccountType();
+			}
+    		  
+    	  }).start(); 
+    }
+    
+    private static void ESDelete(  AdminAccount aa){    	
+    
+    	  String[] indexNames = new String[] {     	        	
+    	        		 "cnki"    	        	
+    	        		};
+    	 String[] value = new String[]{"早期"};
     	 HashMap<String,Object[]> contentMap = new HashMap<String,Object[]>();
-    	 contentMap.put("organ_name",value);    	 	 
-    	  aa.bulkDelete(clusterList, indexNames, contentMap);
-    	 
+    	 contentMap.put("name",value);  
+    	System.out.println(aa.bulkDelete(indexNames, contentMap)); 
+    	
     }
     private static void ESInsert( AdminAccount aa){   	 
-    	List<String> clusterList = new ArrayList<String>();
-    	//一个集群
-        clusterList.add("10.107.6.82:9300"); 
+
     	String host = "10.105.223.24";
  		String userName = "root";
  		String password = "buptmitc"; 		
@@ -79,9 +89,23 @@ public class App
  		String databaseName = "cnki_2015_0419";
  		String priTableName = "tb_cnki";
  		String uniqFieldName = "uniq_id"; 
- 		String indexName = "cnki";
+ 		
  		String indexType = "paper";
  		String indexId = "2";
+ 		String indexTime = "data-missing";
+ 		String indexName = "cnki" + "-" + indexTime +"-"+indexId ;
+//		DateTime dataTime = new DateTime();
+//
+//		String dateFormat = dataTime.getYear()
+//				+ "-"
+//				+ (dataTime.getMonthOfYear() < 10 ? ("0" + dataTime
+//						.getMonthOfYear()) : dataTime.getMonthOfYear())
+//				+ "-"
+//				+ (dataTime.getDayOfMonth() < 10 ? ("0" + dataTime
+//						.getDayOfMonth()) : dataTime.getDayOfMonth());
+//		String new_indexName = index_name + "-" + index_id + "-" + dateFormat;
+ 		
+ 		
  		Map<String,String> tableSimple = new HashMap<String,String>();
  		Map<String,String> tableComplex = new HashMap<String,String>();
  		
@@ -103,14 +127,14 @@ public class App
  		dbC.setIndexType(indexType);
  		dbC.setIndexId(indexId);
  		dbC.setIndexName(indexName);
- 		
+ 		dbC.setIndexTime(indexTime);
  		//ESContent
  		dbC.setPriTableName(priTableName);
  		dbC.setTableComplexNames(tableComplex);
  		dbC.setTableSimpleNames(tableSimple);
  		dbC.setUniqFieldName(uniqFieldName);
- 		aa.bulkInsertFromMysql(clusterList, dbC);
-    }
+ 		System.out.println(aa.bulkInsert(dbC));
+ 	    }
     
     private static void ESSearch( AdminAccount aa) {
     	List<String> clusterList = new ArrayList<String>();
@@ -183,9 +207,9 @@ public class App
         	 
         
         	
-     //    searchContentMap.put(searchField1, searchValue1);
- 		searchContentMap.put(searchField2, searchValue2);
- 	//	searchContentMap.put(searchField3, searchValue3);
+    //   searchContentMap.put(searchField1, searchValue1);
+ 	//	searchContentMap.put(searchField2, searchValue2);
+ 		searchContentMap.put(searchField3, searchValue3);
      
         	
  		String filtField1 = "journal_year"; 
@@ -199,13 +223,13 @@ public class App
         	 
              
          
-       	List<Map<String, Object>> rs =  aa.search(clusterList, indexNames, searchContentMap, searchLogic, filterContentMap, filterLogic, from, offset, sortField, sortType);
+       	List<Map<String, Object>> rs =  aa.search( indexNames, searchContentMap, searchLogic, filterContentMap, filterLogic, from, offset, sortField, sortType);
        	if(rs.isEmpty()){
 				System.out.println("没有检索结果");
 		}
        
        
-        long count = aa.getCount(clusterList,indexNames, searchContentMap, searchLogic,filterContentMap,filterLogic);
+        long count = aa.getCount(indexNames, searchContentMap, searchLogic,filterContentMap,filterLogic);
 		System.out.println(count);	
 	
     }

@@ -17,7 +17,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.joda.time.DateTime;
 
-import com.keyanpai.es.ESControlImp;
+import com.keyanpai.es.control.ESControlImp;
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
 
@@ -80,11 +80,12 @@ public class DBServiceImp implements DBService{
 				for (int i = 0; i < queryPerid; i++) {	
 					List<XContentBuilder> dataList = _getTablesData(
 							this.dbC.getPriTableName(),this.dbC.getTableSimpleNames(),this.dbC.getTableComplexNames(),this.dbC.getUniqFieldName(), columns, i,columnsComplex);
-						esControlImp.bulkInsert(dataList,this.dbC.getIndexId(), this.dbC.getIndexName(), this.dbC.getIndexType());
+						esControlImp.bulkInsert(dataList, this.dbC.getIndexName() ,this.dbC.getIndexType());
 							System.out.println(i +":"+  DateTime.now());
 							
 				}
 			}
+			return true;
 		}
 		catch(Exception e)
 		{
@@ -330,10 +331,14 @@ public class DBServiceImp implements DBService{
 	public void close() {
 		// TODO Auto-generated method stub
 		try {
-			this.stmt.close();
-			this.stmt2.close();
-			this.stmtMax.close();
-			this.conn.close();
+			if(!this.stmt.isClosed())
+				this.stmt.close();
+			if(!this.stmt2.isClosed())
+				this.stmt2.close();
+			if(!this.stmtMax.isClosed())
+				this.stmtMax.close();
+			if(!this.conn.isClosed())
+				this.conn.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			this.logger.error(e.getMessage());

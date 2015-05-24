@@ -1,4 +1,4 @@
-package com.keyanpai.es;
+package com.keyanpai.es.control;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,26 +20,18 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.joda.time.DateTime;
 
-
-
-
-
-
-
-
-
-
-
-
-
+import com.keyanpai.es.MySearchOption;
 import com.keyanpai.es.MySearchOption.SearchLogic;
+import com.keyanpai.es.search.ESCreatQueryBuilder;
+import com.keyanpai.es.search.ESSearchImp;
 
-public class ESControlImp implements ESControl{
-
+public class ESControlImp extends ESControl{
+	
 	/*类初始化*/
 	private static ESControlImp esControlImp;
 	private Logger logger = Logger.getLogger(ESControl.class);			
 	private Client ESClient = null;
+	private ESCreatQueryBuilder esCreatQueryBuilder = new  ESCreatQueryBuilder();
 	
 	private ESControlImp(){
 		PropertyConfigurator.configure("../com.D-media.keyanpai/log4j.properties") ;
@@ -62,42 +54,21 @@ public class ESControlImp implements ESControl{
 		return false;
 	}
 	
-	
-	
-	private ESSearchImp esSearchImp;
-	public void setESSeachImp(ESSearchImp esSearchImp)
-	{
-		this.esSearchImp = esSearchImp;
-		this.esSearchImp.searchConfigure(ESClient);
-	}
-	
-	
-	
-	public boolean bulkInsert(List<XContentBuilder> dataList, String index_id,
-			String index_name, String index_type) {
+	public boolean bulkInsert(List<XContentBuilder> dataList, 
+			String index_name,String index_type) {
 		// TODO Auto-generated method stub
-		return this._bulkInsertData(dataList, index_id, index_name, index_type) ;
+		return this._bulkInsertData(dataList,index_name,index_type) ;
 		
 	}
 
 	private boolean _bulkInsertData(List<XContentBuilder> dataList,
-			String index_id, String index_name, String index_type) {
+			String index_name, String index_type) {
 		// TODO Auto-generated method stub
 		try{
     		BulkRequestBuilder bulk = this.ESClient.prepareBulk();
     		for(XContentBuilder xc : dataList)
     		{
-    			DateTime dataTime = new DateTime();
-
-    			String dateFormat = dataTime.getYear()
-    					+ "-"
-    					+ (dataTime.getMonthOfYear() < 10 ? ("0" + dataTime
-    							.getMonthOfYear()) : dataTime.getMonthOfYear())
-    					+ "-"
-    					+ (dataTime.getDayOfMonth() < 10 ? ("0" + dataTime
-    							.getDayOfMonth()) : dataTime.getDayOfMonth());
-    			String new_indexName = index_name + "-" + index_id + "-" + dateFormat;
-    			IndexRequest request = new IndexRequest(new_indexName, index_type);
+    			IndexRequest request = new IndexRequest(index_name, index_type);
     			request.source(xc);
     			bulk.add(request);
     		}
@@ -120,10 +91,9 @@ public class ESControlImp implements ESControl{
 		// TODO Auto-generated method stub
 		try{
 			QueryBuilder queryBuilder = null;
-			queryBuilder = this.esSearchImp.createQueryBuilder(contentMap, SearchLogic.must);
+			queryBuilder = this.esCreatQueryBuilder.createQueryBuilder(contentMap, SearchLogic.must);
 			this.logger.warn("[" + indexName + "]" + queryBuilder.toString());
-			this.ESClient.prepareDeleteByQuery(indexName).setQuery(queryBuilder).execute().actionGet();
-		
+			this.ESClient.prepareDeleteByQuery(indexName).setQuery(queryBuilder).execute().actionGet();		
 			return true;
 		}
 		catch(Exception e)
@@ -134,12 +104,23 @@ public class ESControlImp implements ESControl{
 		
 	}
 
+	private  List<Map<String, Object>> simpleSearch(String[] indexNames,
+	HashMap<String, Object[]> searchContentMap,
+	HashMap<String, Object[]> filterContentMap, int from, int offset,
+	 String sortField, String sortType) {
+	// TODO Auto-generated method stub
+		SearchLogic searchLogic = indexNames.length > 1 ? SearchLogic.should : SearchLogic.must;
+		ESSearchImp esSearchImp = new ESSearchImp(this.ESClient);
+		return esSearchImp.simpleSearch(
+		indexNames, searchContentMap, searchLogic, filterContentMap
+		, searchLogic, from, offset, sortField, sortType);
+}
 	public boolean bulkUpdate(String indexName,
 			HashMap<String, Object[]> oldContentMap,
 			HashMap<String, Object[]> newContentMap) {
 		// TODO Auto-generated method stub
 		try{
-			List<Map<String ,Object>> searchResult = this.esSearchImp.simpleSearch(
+			List<Map<String ,Object>> searchResult = this.simpleSearch(
 					new String[]{indexName}, oldContentMap, null, 0,1,null, null);
 			if (searchResult == null || searchResult.size() == 0) {
 				  this.logger.warn("未找到需要更新的数据");
@@ -175,7 +156,7 @@ public class ESControlImp implements ESControl{
 		// TODO Auto-generated method stub
 		try{
 			QueryBuilder queryBuilder = null;
-			queryBuilder = this.esSearchImp.createQueryBuilder(contentMap, SearchLogic.must);
+			queryBuilder = this.esCreatQueryBuilder.createQueryBuilder(contentMap, SearchLogic.must);
 			this.logger.warn("[" + indexName + "]" + queryBuilder.toString());
 			this.ESClient.prepareDeleteByQuery(indexName).setQuery(queryBuilder).execute().actionGet();
 		
@@ -276,16 +257,8 @@ public class ESControlImp implements ESControl{
 		}
 	
 	
-	
-	
-	
-	public boolean update(String[] indexNames,
-			HashMap<String, Object[]> oldContentMap,
-			HashMap<String, Object[]> newContentMap) {
-		// TODO Auto-generated method stub
-		
-		return false;
-	}
+
+
 //根据内容_id进行局部字段更新
 	public boolean update(String indexName,String indexType,String _id,HashMap<String,Object[]> newContentMap) throws InterruptedException, ExecutionException{
 		UpdateRequest updateRequest = new UpdateRequest(indexName,indexType,_id);
@@ -314,4 +287,5 @@ public class ESControlImp implements ESControl{
 		
 		return true;
 	}
+
 }

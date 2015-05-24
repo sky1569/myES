@@ -1,4 +1,4 @@
-package com.keyanpai.es;
+package com.keyanpai.es.search;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.elasticsearch.common.Nullable;
 
 import com.keyanpai.es.MySearchOption.SearchLogic;
 
-public interface ESSearch {
+public interface ESSearchInterface {
 	/**
 	 * 
 	 * @param clusterList
@@ -17,8 +17,8 @@ public interface ESSearch {
 	 * @param indexType
 	 * @return
 	 */
-	 boolean searchConfigure(
-			 Client esClient);
+//	 boolean searchConfigure(
+//			 Client esClient);
 	
 	/**
 	 * 
@@ -33,7 +33,7 @@ public interface ESSearch {
 	 * @param sortType
 	 * @return
 	 */
-	 List<Map<String, Object>> simpleSearch(String[] indexNames
+	 List<Map<String, Object>> search(String[] indexNames
             , HashMap<String, Object[]> searchContentMap, SearchLogic searchLogic
             , @Nullable HashMap<String, Object[]> filterContentMap, @Nullable SearchLogic filterLogic
             , int from, int offset, @Nullable String sortField, @Nullable String sortType);

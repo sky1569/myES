@@ -1,4 +1,4 @@
-package com.keyanpai.es;
+package com.keyanpai.es.search;
 
 import java.util.HashMap;
 import java.util.List;

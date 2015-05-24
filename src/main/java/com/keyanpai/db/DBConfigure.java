@@ -21,6 +21,7 @@ public class DBConfigure {
 	private String indexId;
 	private String indexName;
 	private String indexType;
+	private String indexTime;
 	public String getIndexName() {
 		return indexName;
 	}
@@ -86,5 +87,12 @@ public class DBConfigure {
 	}
 	public void setTableComplexNames(Map<String, String> tableComplexNames) {
 		this.tableComplexNames = tableComplexNames;
+	}
+	public void setIndexTime(String indexTime) {
+		this.indexTime = indexTime;		
+	}
+	public String getIndexTime()
+	{
+		return this.indexTime;				
 	}
 }

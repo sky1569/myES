@@ -3,25 +3,33 @@ package com.keyanpai.account;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+
 import com.keyanpai.db.DBConfigure;
 import com.keyanpai.db.DBServiceImp;
-import com.keyanpai.es.ESClient;
-import com.keyanpai.es.ESControlImp;
-import com.keyanpai.es.ESSearchImp;
 import com.keyanpai.es.MySearchOption.SearchLogic;
 
+import com.keyanpai.es.client.ESClientImp;
+import com.keyanpai.es.control.ESControlImp;
+import com.keyanpai.es.control.ESControlInterface;
+import com.keyanpai.es.search.ESSearchImp;
+import com.keyanpai.es.search.ESSearchInterface;
 
-public class AdminAccount extends Account {
-	private ESClient esClient = new ESClient();
+
+public class AdminAccount extends Account implements ESControlInterface,ESSearchInterface {
+	private ESClientImp esClient = null;
 	private ESControlImp esControlImp = ESControlImp.getInstance();
-	private ESSearchImp esSearchImp = new ESSearchImp();
-	private DBServiceImp dbServiceImp = DBServiceImp.getDBServiceImp();
+	//private DBServiceImp dbServiceImp = DBServiceImp.getDBServiceImp();
 	private Logger logger = Logger.getLogger(AdminAccount.class);
+	
+	ExecutorService executor = Executors.newFixedThreadPool(3);
+	
 	
 	public AdminAccount(String id
 					   ,String ip
@@ -37,48 +45,52 @@ public class AdminAccount extends Account {
 		PropertyConfigurator.configure("../com.D-media.keyanpai/log4j.properties") ;
 	}	
 	
-	private void getClientClosed() {
+	public void getClientClosed() {
 		// TODO Auto-generated method stub
-		this.esClient.destroy();		
+		this.esClient.clientDestroy();
 	}
 
-	private void getClientConn(List<String> clusterList) {
+	public void getClientConn(List<String> clusterList) {
 		// TODO Auto-generated method stub
+		if(this.esClient != null)
+			{
+				this.getClientClosed();
+				this.esClient = null;
+			}
+		this.esClient = new ESClientImp();
 		this.esClient.ESClientConfigure(clusterList);
 		this.esClient.clientConn();
 	}
 
-	public boolean bulkInsertFromMysql(List<String> clusterList,DBConfigure dbConfigure){
-		try{
-			this.getClientConn(clusterList);
+	public boolean bulkInsert(DBConfigure dbConfigure) {
+		// TODO Auto-generated method stub
+		DBServiceImp dbServiceImp = DBServiceImp.getDBServiceImp();
+		try{			
+					
 			this.esControlImp.controlConfigure(this.esClient.getClient());
-			this.dbServiceImp.DBSetter(dbConfigure);
-			this.dbServiceImp.open();
-			this.dbServiceImp.handlData(this.esControlImp);	
-			this.dbServiceImp.close();
-			this.getClientClosed();
-			return true;
+			dbServiceImp.DBSetter(dbConfigure);
+			dbServiceImp.open();							
+			return dbServiceImp.handlData(this.esControlImp);
 		}
 		catch(Exception e)
 		{
 			this.logger.error(e.getMessage());
 		}
+		finally{
+			dbServiceImp.close();
+		}
 		return false;
+	}
 
-	}	
 
-
-   public boolean bulkUpdate(List<String> clusterList,String indexName,
+   public boolean bulkUpdate(String indexName,
 			HashMap<String, Object[]> oldContentMap,
 			HashMap<String, Object[]> newContentMap) {
 		// TODO Auto-generated method stub	
 	     try{
-			   this.getClientConn(clusterList);
-			   this.esControlImp.controlConfigure(this.esClient.getClient());
-			   this.esControlImp.setESSeachImp(this.esSearchImp);
-			   this.esControlImp.bulkUpdate(indexName, oldContentMap, newContentMap);
-			   this.getClientClosed();
-			   return true;
+		
+			   this.esControlImp.controlConfigure(this.esClient.getClient());		
+			   return this.esControlImp.bulkUpdate(indexName, oldContentMap, newContentMap);
 		    }
 			catch(Exception e)
 			{
@@ -87,16 +99,12 @@ public class AdminAccount extends Account {
 			return false;
 			}
 
-	public boolean bulkDelete(List<String> clusterList,String[] indexName,
+	public boolean bulkDelete(String[] indexName,
 			HashMap<String, Object[]> contentMap) {
 		// TODO Auto-generated method stub
-		try{
-			this.getClientConn(clusterList);
-			this.esControlImp.controlConfigure(this.esClient.getClient());
-			this.esControlImp.setESSeachImp(this.esSearchImp);
-			this.esControlImp.bulkDelete(indexName, contentMap);
-			this.getClientClosed();
-			return false;
+		try{			
+			this.esControlImp.controlConfigure(this.esClient.getClient());					
+			return this.esControlImp.bulkDelete(indexName, contentMap);
 			}
 		catch(Exception e)
 		{
@@ -104,33 +112,28 @@ public class AdminAccount extends Account {
 		}
 		return false;
 	}
-	
 
-	public List<Map<String, Object>> search(List<String> clusterList,String[] indexNames,
+	public long getCount(String[] indexNames,
+			HashMap<String, Object[]> searchContentMap,
+			SearchLogic searchLogic,
+			HashMap<String, Object[]> filterContentMap, SearchLogic filterLogic) {
+		// TODO Auto-generated method stub
+		ESSearchImp esSearchImp = new ESSearchImp(this.esClient.getClient());			
+		long rs = esSearchImp.getCount(indexNames, searchContentMap, searchLogic, filterContentMap, filterLogic);
+		return rs;
+	}
+
+	public List<Map<String, Object>> search(String[] indexNames,
 			HashMap<String, Object[]> searchContentMap,
 			SearchLogic searchLogic,
 			HashMap<String, Object[]> filterContentMap,
 			SearchLogic filterLogic, int from, int offset, String sortField,
 			String sortType) {
 		// TODO Auto-generated method stub
-		this.getClientConn(clusterList);		
-		this.esSearchImp.searchConfigure(this.esClient.getClient());		
-		List<Map<String, Object>> rs = this.esSearchImp.simpleSearch(
+		ESSearchImp esSearchImp = new ESSearchImp(this.esClient.getClient());			
+		List<Map<String, Object>> rs = esSearchImp.simpleSearch(
 				indexNames, searchContentMap, searchLogic, filterContentMap, filterLogic, from, offset, sortField, sortType);
-		this.getClientClosed();
-		return rs;
-	}
-
-	public long getCount(List<String> clusterList,String[] indexNames,
-			HashMap<String, Object[]> searchContentMap,
-			SearchLogic searchLogic,
-			HashMap<String, Object[]> filterContentMap, SearchLogic filterLogic) {
-		// TODO Auto-generated method stub
-		this.getClientConn(clusterList);		
-		this.esSearchImp.searchConfigure(this.esClient.getClient());		
-		long rs = this.esSearchImp.getCount(indexNames, searchContentMap, searchLogic, filterContentMap, filterLogic);
-		this.getClientClosed();
-		return rs;
+		return rs;		
 	}
 
 	public List<Map<String, Object>> getSuggest(String[] indexNames,
@@ -138,6 +141,16 @@ public class AdminAccount extends Account {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
+	public Map<String, String> group(String indexName,
+			HashMap<String, Object[]> mustSearchContentMap,
+			HashMap<String, Object[]> shouldSearchContentMap,
+			String[] groupFields) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 //	public void up(){
 //	System.out.println(this.getName()+":up!");
@@ -149,31 +162,34 @@ public class AdminAccount extends Account {
 //	System.out.println(this.getName()+":comment!");
 //}
 
-	public boolean update(
-			List<String> clusterList,String indexName
-			,String indexType,String _id,HashMap<String ,Object[]> newContentMap)
-	{
-		System.out.println(this.getName()+":update!");		
-		this.getClientConn(clusterList);
-		this.esControlImp.controlConfigure(this.esClient.getClient());
-		try {
-			this.esControlImp.update(indexName, indexType, _id, newContentMap);
-			
-			return true;
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		finally
-		{
-			this.getClientClosed();
-		}
-		return false;
-	
-	}
-	
+//	public boolean update(
+//			List<String> clusterList,String indexName
+//			,String indexType,String _id,HashMap<String ,Object[]> newContentMap)
+//	{
+//		System.out.println(this.getName()+":update!");		
+//	
+//		this.esControlImp.controlConfigure(this.esClient.getClient());
+//		try {
+//			this.esControlImp.update(indexName, indexType, _id, newContentMap);
+//			
+//			return true;
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (ExecutionException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		finally
+//		{
+//			this.getClientClosed();
+//		}
+//		return false;
+//	
+//	}
+
+
+
+
 
 }
