@@ -4,19 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.keyanpai.account.AdminAccount;
+import com.keyanpai.account.UserAccount;
 import com.keyanpai.db.DBConfigure;
-import com.keyanpai.db.DBServiceImp;
 import com.keyanpai.es.MySearchOption;
 import com.keyanpai.es.MySearchOption.DataFilter;
 import com.keyanpai.es.MySearchOption.SearchLogic;
 import com.keyanpai.es.MySearchOption.SearchType;
-import com.keyanpai.es.client.ESClientImp;
-import com.keyanpai.es.control.ESControlImp;
-import com.keyanpai.es.search.ESSearchImp;
-import com.keyanpai.escontent.CnkiContent;
+import com.keyanpai.es.stat.ESStatImp;
+
 
 
 
@@ -34,39 +31,34 @@ public class App
         System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
         AdminAccount aa = new AdminAccount("1","localhost","sky","1206");
           List<String> clusterList = new ArrayList<String>();
-          clusterList.add("10.107.6.82:9300");
-          aa.getClientConn(clusterList);
-              // ESSearch(aa);
-
-              ESDelete(aa);
-           //   ESInsert(aa);
-            //  ESUpdate(aa);
+          //clusterList.add("10.107.6.82:9300");
+          clusterList.add("127.0.0.1:9300");
+          
+        aa.getClientConn(clusterList);
+       System.out.println( aa.getCount("journal_year"));
+       System.out.println( aa.getMin("journal_year"));
+     // aa.deleteIndex("cnki-data-missing-4");
+              //  ESUpdate(aa);
+//          ESStatImp esStatImp = new ESStatImp();
+//          esStatImp.statConfigure(esClient);
+//          esStatImp.getMin("by_name", "by_year", "name", "journal_year");
                aa.getClientClosed();
     }
     
     
-    private static void ESUpdate(final AdminAccount aa){
-    	
-    	final  String[] indexNames = new String[] {     	        	
-    	        		 "cnki-1-2015-05-23"    	        	
-    	        		};
-    	final String indexType = "paper";
-    	  String[] value = new String[] {"北京邮电大学","倪尧天","estest"};
-    	  String field = "keywords_name";
-    	  final String _id = "AU1_NpqJmPZGBB7kwM95";
-    	  final  HashMap<String,Object[]> newContentMap = new HashMap<String,Object[]>();
-    	  newContentMap.put(field, value);
-    	
-	  
-    	  new Thread(new Runnable(){
-
-			public void run() {
-				// TODO Auto-generated method stub
-				aa.getAccountType();
-			}
-    		  
-    	  }).start(); 
-    }
+//    private static void ESUpdate(final AdminAccount aa){
+//    	
+//    	final  String[] indexNames = new String[] {     	        	
+//    	        		 "cnki-1-2015-05-23"    	        	
+//    	        		};
+//    	final String indexType = "paper";
+//    	  String[] value = new String[] {"北京邮电大学","倪尧天","estest"};
+//    	  String field = "keywords_name";
+//    	  final String _id = "AU1_NpqJmPZGBB7kwM95";
+//    	  final  HashMap<String,Object[]> newContentMap = new HashMap<String,Object[]>();
+//    	  newContentMap.put(field, value);
+//    	  
+//    }
     
     private static void ESDelete(  AdminAccount aa){    	
     
@@ -91,7 +83,7 @@ public class App
  		String uniqFieldName = "uniq_id"; 
  		
  		String indexType = "paper";
- 		String indexId = "2";
+ 		String indexId = "4";
  		String indexTime = "data-missing";
  		String indexName = "cnki" + "-" + indexTime +"-"+indexId ;
 //		DateTime dataTime = new DateTime();
@@ -133,6 +125,7 @@ public class App
  		dbC.setTableComplexNames(tableComplex);
  		dbC.setTableSimpleNames(tableSimple);
  		dbC.setUniqFieldName(uniqFieldName);
+ 	 //   System.out.println(aa.creatIndexTemplate("/home/sky/sky/elasticsearch-1.5.2/templates/templates-cnki.json", indexName, indexType));
  		System.out.println(aa.bulkInsert(dbC));
  	    }
     
@@ -144,7 +137,7 @@ public class App
         String[] type = new String[] {"paper"};   
         
         String[] indexNames = new String[] { 
-        		"cnki-1-2015-05-23"
+        		"cnki-data-missing-4"
 //        		 "beiyou-1-2015-05-13"
 //        		,"beiyou-1-2015-05-14" 
         		};
@@ -224,6 +217,7 @@ public class App
              
          
        	List<Map<String, Object>> rs =  aa.search( indexNames, searchContentMap, searchLogic, filterContentMap, filterLogic, from, offset, sortField, sortType);
+       if(rs != null)
        	if(rs.isEmpty()){
 				System.out.println("没有检索结果");
 		}

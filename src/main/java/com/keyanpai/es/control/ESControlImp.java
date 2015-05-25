@@ -10,6 +10,13 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
+import org.elasticsearch.action.admin.indices.template.delete.DeleteIndexTemplateRequest;
+import org.elasticsearch.action.admin.indices.template.delete.DeleteIndexTemplateResponse;
+import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -18,7 +25,7 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.joda.time.DateTime;
+
 
 import com.keyanpai.es.MySearchOption;
 import com.keyanpai.es.MySearchOption.SearchLogic;
@@ -61,11 +68,39 @@ public class ESControlImp extends ESControl{
 		
 	}
 
+	public boolean creatIndexTemplate(String template,String indexTemplateName,String indexType)
+	{
+		try{
+		//	this.ESClient.admin().indices().prepareCreate(indexName).execute().actionGet();
+		
+			 PutIndexTemplateResponse putIndexTemplateResponse =  
+					 this.ESClient.admin().indices().preparePutTemplate(indexTemplateName)
+					 .setSource(template).execute().actionGet();
+			if(putIndexTemplateResponse.isAcknowledged())
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}		
+			
+		}
+		catch(Exception e)
+		{
+			this.logger.error("创建索引失败");
+			this.logger.error(e.getMessage());
+			return false;
+		}
+	}
+	
 	private boolean _bulkInsertData(List<XContentBuilder> dataList,
 			String index_name, String index_type) {
 		// TODO Auto-generated method stub
-		try{
-    		BulkRequestBuilder bulk = this.ESClient.prepareBulk();
+		
+			
+		try{			
+    		BulkRequestBuilder bulk = this.ESClient.prepareBulk();    	
     		for(XContentBuilder xc : dataList)
     		{
     			IndexRequest request = new IndexRequest(index_name, index_type);
@@ -287,5 +322,50 @@ public class ESControlImp extends ESControl{
 		
 		return true;
 	}
-
+  public boolean deleteIndexName(String indexName)
+  {		 try{
+			  DeleteIndexResponse delete = this.ESClient
+					  .admin().indices().delete(new DeleteIndexRequest(indexName)).actionGet();
+			  if (!delete.isAcknowledged()) {
+				   this.logger.error(indexName+ " wasn't deleted");
+				   return false;
+				}
+			  else return true;		
+  		}
+  		catch(Exception e)
+  		{
+  			this.logger.error(e.getMessage());
+  			return false;
+  		}
+  }
+  
+  public boolean deleteIndexTemplate(String deleteIndexTemplateName)
+  {
+	  try{
+	  DeleteIndexTemplateResponse delete = this.ESClient
+			  .admin().indices().deleteTemplate(
+					  new DeleteIndexTemplateRequest(deleteIndexTemplateName)).actionGet();
+	  if (!delete.isAcknowledged()) {
+		   this.logger.error(deleteIndexTemplateName + " wasn't deleted");
+		   return false;
+		}
+	  else return true;	
+	  }
+	  catch(Exception e)
+	  {
+		  this.logger.error(e.getMessage());
+	  }
+	  return false;
+  }
+  
+	public boolean creatIndex(String indexName) {
+		// TODO Auto-generated method stub
+		CreateIndexResponse create = this.ESClient.admin().indices().create(
+				new CreateIndexRequest(indexName)).actionGet();
+		if (!create.isAcknowledged()) {
+			   this.logger.error(indexName  +" was created");
+			   return false;
+			}
+		  else return true;	
+	}
 }

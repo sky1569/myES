@@ -110,7 +110,7 @@ public class DBServiceImp implements DBService{
 			for (Entry<String, String> colunm : columns.entrySet()) {
 				dataType = colunm.getValue();
 				colmnuName = colunm.getKey();
-				if (dataType.equals("tinyint") || dataType.equals("smallint")) {
+				if (dataType.equals("tinyint") || dataType.equals("smallint")) {					
 					xc.field(colmnuName,rs.getInt(colmnuName));
 				} else if (dataType.equals("mediumint")
 						|| dataType.equals("integer")
@@ -124,7 +124,8 @@ public class DBServiceImp implements DBService{
 					xc.field(colmnuName,rs.getDouble(colmnuName));
 				}else if(dataType.equals("varchar"))
 				{
-					xc.field(colmnuName,rs.getString(colmnuName));
+					
+					xc.field(colmnuName,rs.getString(colmnuName) == null ? "null":rs.getString(colmnuName));
 				}    
 
 			}			
@@ -218,9 +219,8 @@ public class DBServiceImp implements DBService{
 		Vector<String> v = new Vector<String>();
 		try {
 			while (rs.next())
-			{
-				v.add(rs.getString(3));
-			
+			{			
+				v.add(rs.getString(3) == null ? "null":rs.getString(3));
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
