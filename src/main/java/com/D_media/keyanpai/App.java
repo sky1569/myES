@@ -27,8 +27,7 @@ public class App
 	
     public static void main( String[] args ) 
     {
-        System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
-        System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );
+        System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );      
         AdminAccount aa = new AdminAccount("1","localhost","sky","1206");
           List<String> clusterList = new ArrayList<String>();
           //clusterList.add("10.107.6.82:9300");
