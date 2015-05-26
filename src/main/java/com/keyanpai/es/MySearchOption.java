@@ -32,7 +32,7 @@ public class MySearchOption implements Serializable {
         /*逻辑should关系*/
         , should
     }
-    public enum DataFilter {
+    public enum DataFilter{
         /*只显示有值的*/
         exists
         /*显示没有值的*/

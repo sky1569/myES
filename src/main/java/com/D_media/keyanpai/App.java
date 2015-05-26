@@ -32,17 +32,10 @@ public class App
         AdminAccount aa = new AdminAccount("1","localhost","sky","1206");
           List<String> clusterList = new ArrayList<String>();
           //clusterList.add("10.107.6.82:9300");
-          clusterList.add("127.0.0.1:9300");
-          
-        aa.getClientConn(clusterList);
-       System.out.println( aa.getCount("journal_year"));
-       System.out.println( aa.getMin("journal_year"));
-     // aa.deleteIndex("cnki-data-missing-4");
-              //  ESUpdate(aa);
-//          ESStatImp esStatImp = new ESStatImp();
-//          esStatImp.statConfigure(esClient);
-//          esStatImp.getMin("by_name", "by_year", "name", "journal_year");
-               aa.getClientClosed();
+          clusterList.add("elasticsearch:127.0.0.1:9300");          
+          aa.getClientConn(clusterList);
+          ESSearch(aa);
+          aa.getClientClosed();
     }
     
     
@@ -83,8 +76,8 @@ public class App
  		String uniqFieldName = "uniq_id"; 
  		
  		String indexType = "paper";
- 		String indexId = "4";
- 		String indexTime = "data-missing";
+ 		String indexId = "1";
+ 		String indexTime = "05-25";
  		String indexName = "cnki" + "-" + indexTime +"-"+indexId ;
 //		DateTime dataTime = new DateTime();
 //
@@ -104,9 +97,9 @@ public class App
  		tableSimple.put("organ_name","tb_organ");
  		tableSimple.put("author_name_cn","tb_author_cn");
  		tableSimple.put("author_name_en","tb_author_cn");
- 		tableSimple.put("keywords_name","tb_keywords");
+ 		tableSimple.put("keywords_name_abstract","tb_keywords");
  		
- 		tableComplex.put("ref_cn","tb_ref_cn");
+ 		tableComplex.put("ref_cn_abstract","tb_ref_cn");
  		tableComplex.put("ref_en","tb_ref_en");
  		
  		
@@ -130,14 +123,11 @@ public class App
  	    }
     
     private static void ESSearch( AdminAccount aa) {
-    	List<String> clusterList = new ArrayList<String>();
-    	//一个集群
-        clusterList.add("10.107.6.82:9300"); 
-       
+
         String[] type = new String[] {"paper"};   
         
         String[] indexNames = new String[] { 
-        		"cnki-data-missing-4"
+        		"cnki-05-25-1"
 //        		 "beiyou-1-2015-05-13"
 //        		,"beiyou-1-2015-05-14" 
         		};
@@ -151,7 +141,7 @@ public class App
          
          
          
-     	String searchField1 = "keywords_name";    
+     	 String searchField1 = "journal_year";    
      	
          SearchType searchType1 = SearchType.range;
          SearchLogic searchLogic1 = SearchLogic.must;
@@ -167,7 +157,7 @@ public class App
      	
          String searchField2= "keywords_name";       
          
-         SearchType searchType2 = SearchType.querystring;
+         SearchType searchType2 = SearchType.term;
          SearchLogic searchLogic2 = SearchLogic.must;
          String queryStringPrecision2 = "100";
          DataFilter dataFilter2 = DataFilter.exists;
@@ -176,10 +166,10 @@ public class App
          
          MySearchOption ms2 = new MySearchOption(searchType2,searchLogic2
          		,queryStringPrecision2,dataFilter2,boost2,highlight2);
-         Object[] searchValue2 = new Object[]{"北京邮电大学","倪尧天",ms2};       
+         Object[] searchValue2 = new Object[]{"肠道病毒感染",ms2};       
          
          
-         String searchField3 = "abstracts";
+         String searchField3 = "abstracts_anaylze";
          
          SearchType searchType3 = SearchType.querystring;
          SearchLogic searchLogic3 = SearchLogic.should;
@@ -190,7 +180,7 @@ public class App
          
          MySearchOption ms3 = new MySearchOption(searchType3,searchLogic3
          		,queryStringPrecision3,dataFilter3,boost3,highlight3);
-         Object[] searchValue3 = new  Object[]{"早产儿","农村",ms3};
+         Object[] searchValue3 = new  Object[]{"脊髓灰质",ms3};
          
          
 
@@ -200,8 +190,8 @@ public class App
         	 
         
         	
-    //   searchContentMap.put(searchField1, searchValue1);
- 	//	searchContentMap.put(searchField2, searchValue2);
+    searchContentMap.put(searchField1, searchValue1);
+ 	searchContentMap.put(searchField2, searchValue2);
  		searchContentMap.put(searchField3, searchValue3);
      
         	
@@ -211,7 +201,7 @@ public class App
  		
  		HashMap<String, Object[]> filterContentMap = new HashMap<String,Object[]>();      	
         	SearchLogic filterLogic = SearchLogic.must;
-        	filterContentMap.put(filtField1,filtValue1);
+        //	filterContentMap.put(filtField1,filtValue1);
          
         	 
              
