@@ -18,7 +18,7 @@ import com.keyanpai.es.MySearchOption.SearchLogic;
 public class ESCreatQueryBuilder {
 	private Logger logger = Logger.getLogger(ESCreatQueryBuilder.class);	
 	public ESCreatQueryBuilder(){		
-		PropertyConfigurator.configure("../com.D-media.keyanpai/log4j.properties") ;
+		PropertyConfigurator.configure("../keyanpai/log4j.properties") ;
 	}	
 
 	public QueryBuilder createQueryBuilder(
