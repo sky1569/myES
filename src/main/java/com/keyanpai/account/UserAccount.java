@@ -6,7 +6,7 @@ import com.keyanpai.es.stat.ESStatImp;
 public class UserAccount extends GuestAccount /*implements ESStatInterface*/ {
 	
 
-		
+	public UserAccount(){}
 	public UserAccount(String id
 					   ,String ip
 					   ,String name
