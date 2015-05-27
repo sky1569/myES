@@ -41,7 +41,7 @@ public class ESControlImp extends ESControl{
 	private ESCreatQueryBuilder esCreatQueryBuilder = new  ESCreatQueryBuilder();
 	
 	private ESControlImp(){
-		PropertyConfigurator.configure("../com.D-media.keyanpai/log4j.properties") ;
+		PropertyConfigurator.configure("../keyanpai/log4j.properties") ;
 	}
 	public static synchronized ESControlImp getInstance(){
 		if(esControlImp == null)
