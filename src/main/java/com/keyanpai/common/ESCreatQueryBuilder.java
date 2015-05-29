@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -15,11 +14,7 @@ import com.keyanpai.common.MySearchOption.SearchLogic;
 
 
 public class ESCreatQueryBuilder {
-	private Logger logger = Logger.getLogger(ESCreatQueryBuilder.class);	
-	public ESCreatQueryBuilder(){		
-	//	PropertyConfigurator.configure("../resources/log4j.properties") ;
-	}	
-
+	private Logger logger = Logger.getLogger("DAO.ESCreatQueryBuilder");	
 	public QueryBuilder createQueryBuilder(
 			HashMap<String, Object[]> searchContentMap, SearchLogic searchLogic) {
 		// TODO Auto-generated method stub
@@ -71,13 +66,15 @@ public class ESCreatQueryBuilder {
 				 for (Object valueItem : values) {
 					 if (valueItem instanceof MySearchOption) {
 						 continue;
-					 }
+						 
+					 }else System.out.println(valueItem);
 					 QueryBuilder queryBuilder = null;
 					 String formatValue = valueItem.toString().trim().replace("*", "");//格式化搜索数据
 			
 					 if (mySearchOption.getSearchType() 
 							 == com.keyanpai.common.MySearchOption.SearchType.term) {
-						 queryBuilder = QueryBuilders.termQuery(field, formatValue).boost(mySearchOption.getBoost());
+						 queryBuilder = QueryBuilders.termQuery(field, formatValue)
+								 .boost(mySearchOption.getBoost());
 					 }
 					 else if (mySearchOption.getSearchType() 
 							 == com.keyanpai.common.MySearchOption.SearchType.querystring) {
@@ -86,8 +83,8 @@ public class ESCreatQueryBuilder {
 		//					 if (!Pattern.matches("[0-9]", formatValue)) {
 		//						 formatValue = "*"+formatValue+"*";							
 		//					 }
-		//				 }
-						 QueryStringQueryBuilder queryStringQueryBuilder = QueryBuilders.queryStringQuery(formatValue)
+		//				 }					
+						 QueryStringQueryBuilder queryStringQueryBuilder = QueryBuilders.queryStringQuery(formatValue).analyzer("ik")
 								 .minimumShouldMatch(mySearchOption.getQueryStringPrecision());
 						 queryBuilder = queryStringQueryBuilder.field(field).boost(mySearchOption.getBoost());
 						 

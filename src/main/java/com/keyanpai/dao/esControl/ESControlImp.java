@@ -6,12 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
 
-import keyanpai.ResourceLoader;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -22,88 +19,61 @@ import org.elasticsearch.action.admin.indices.template.put.PutIndexTemplateRespo
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilder;
+
 
 import com.keyanpai.common.ESCreatQueryBuilder;
 import com.keyanpai.common.MySearchOption;
 import com.keyanpai.common.MySearchOption.SearchLogic;
 import com.keyanpai.dao.esSearch.ESSearchImp;
 
-public class ESControlImp extends ESControl{
+public class ESControlImp extends ESControl implements ESControlInterface{
 	
-	/*类初始化*/
-	private static ESControlImp esControlImp;
-	//private Logger logger = Logger.getLogger(ESControlImp.class);			
 	private Client ESClient = null;
-	private ESCreatQueryBuilder esCreatQueryBuilder = new  ESCreatQueryBuilder();
+	private ESCreatQueryBuilder esCreatQueryBuilder = new  ESCreatQueryBuilder();	
+	private Logger logger = Logger.getLogger("DAO.ESControlImp");
+	public ESControlImp(Client esClient){this.ESClient = esClient;}	
 	
-	public ESControlImp() {		
-			//PropertyConfigurator.configure(ResourceLoader.loadLog4jProperties("log4j.properties")) ;
-		}
-//	public static synchronized ESControlImp getInstance(){
-//		if(esControlImp == null)
-//			esControlImp = new ESControlImp();
-//		return esControlImp;
-//	}
-	
-	public boolean controlConfigure(Client esClient) {
-		// TODO Auto-generated method stub
-		try{
-			this.ESClient = esClient;
-			return true;
-		}
-		catch(Exception e){
-		//	//this.logger.error(e.getMessage());
-		}
-		return false;
+	public boolean creatIndexTemplate(String template
+			,String indexTemplateName
+			,String indexType)
+	{
+				try{		
+					 PutIndexTemplateResponse putIndexTemplateResponse =  
+							 this.ESClient.admin().indices()
+							 .preparePutTemplate(indexTemplateName)
+							 .setSource(template).execute().actionGet();
+					if(putIndexTemplateResponse.isAcknowledged()){
+						return true;
+					}
+					else{
+						this.logger.error("创建索引失败");
+						return false;
+					}					
+				}
+				catch(Exception e){			
+					this.logger.error(e.getMessage());
+					return false;
+				}
 	}
 	
 	public boolean bulkInsert(List<XContentBuilder> dataList, 
 			String index_name,String index_type) {
 		// TODO Auto-generated method stub
-		return this._bulkInsertData(dataList,index_name,index_type) ;
-		
+		return this._bulkInsertData(dataList,index_name,index_type) ;		
 	}
 
-	public boolean creatIndexTemplate(String template,String indexTemplateName,String indexType)
-	{
-		try{
-		//	this.ESClient.admin().indices().prepareCreate(indexName).execute().actionGet();
-		
-			 PutIndexTemplateResponse putIndexTemplateResponse =  
-					 this.ESClient.admin().indices().preparePutTemplate(indexTemplateName)
-					 .setSource(template).execute().actionGet();
-			if(putIndexTemplateResponse.isAcknowledged())
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}		
-			
-		}
-		catch(Exception e)
-		{
-			//this.logger.error("创建索引失败");
-			//this.logger.error(e.getMessage());
-			return false;
-		}
-	}
+	
 	
 	private boolean _bulkInsertData(List<XContentBuilder> dataList,
 			String index_name, String index_type) {
-		// TODO Auto-generated method stub
-		
-			
+		// TODO Auto-generated method stub			
 		try{			
     		BulkRequestBuilder bulk = this.ESClient.prepareBulk();    	
-    		for(XContentBuilder xc : dataList)
-    		{
+    		for(XContentBuilder xc : dataList){
     			IndexRequest request = new IndexRequest(index_name, index_type);
     			request.source(xc);
     			bulk.add(request);
@@ -113,33 +83,32 @@ public class ESControlImp extends ESControl{
     			 return true;
     		}
     		 else {
-    			 //this.logger.error(bulkResponse.buildFailureMessage());
+    			 this.logger.error(bulkResponse.buildFailureMessage());
     		 }
     	}
-    	catch(Exception e)
-    	{
-    		 //this.logger.error(e.getMessage());
+    	catch(Exception e) 	{
+    		 this.logger.error(e.getMessage());
     	}    	
 		return false;    	
 	}
+	
 	public boolean bulkDelete(String[] indexName,
 			HashMap<String, Object[]> contentMap) {
 		// TODO Auto-generated method stub
 		try{
 			QueryBuilder queryBuilder = null;
 			queryBuilder = this.esCreatQueryBuilder.createQueryBuilder(contentMap, SearchLogic.must);
-			//this.logger.warn("[" + indexName + "]" + queryBuilder.toString());
+			this.logger.warn("[" + indexName + "]" + queryBuilder.toString());
 			this.ESClient.prepareDeleteByQuery(indexName).setQuery(queryBuilder).execute().actionGet();		
 			return true;
 		}
-		catch(Exception e)
-		{
-			//this.logger.error(e.getMessage());
+		catch(Exception e){
+			this.logger.error(e.getMessage());
 		}
 		return false;
 		
 	}
-
+	
 	private  List<Map<String, Object>> simpleSearch(String[] indexNames,
 	HashMap<String, Object[]> searchContentMap,
 	HashMap<String, Object[]> filterContentMap, int from, int offset,
@@ -183,7 +152,7 @@ public class ESControlImp extends ESControl{
 		}
 		catch(Exception e)
 		{
-			//this.logger.error(e.getMessage());
+			this.logger.error(e.getMessage());
 		}
 		return false;
 	}
@@ -193,14 +162,14 @@ public class ESControlImp extends ESControl{
 		try{
 			QueryBuilder queryBuilder = null;
 			queryBuilder = this.esCreatQueryBuilder.createQueryBuilder(contentMap, SearchLogic.must);
-			//this.logger.warn("[" + indexName + "]" + queryBuilder.toString());
+			this.logger.warn("[" + indexName + "]" + queryBuilder.toString());
 			this.ESClient.prepareDeleteByQuery(indexName).setQuery(queryBuilder).execute().actionGet();
 		
 			return true;
 		}
 		catch(Exception e)
 		{
-			//this.logger.error(e.getMessage());
+			this.logger.error(e.getMessage());
 		}
 		return false;
 	}
@@ -213,7 +182,7 @@ public class ESControlImp extends ESControl{
 			 xContentBuilder = XContentFactory.jsonBuilder().startObject();
 		 }
 		 catch (IOException e) {
-			 //this.logger.error(e.getMessage());
+			 this.logger.error(e.getMessage());
 			   return false;
 		 }
 		  Iterator<Entry<String, Object[]>> iterator = insertContentMap.entrySet().iterator();
@@ -226,7 +195,7 @@ public class ESControlImp extends ESControl{
 				  xContentBuilder = xContentBuilder.field(field, formatValue);
 			  }
 			  catch (IOException e) {
-				  //this.logger.error(e.getMessage());
+				  this.logger.error(e.getMessage());
 				   return false;
 			  }
 		  }
@@ -234,7 +203,7 @@ public class ESControlImp extends ESControl{
 			  xContentBuilder = xContentBuilder.endObject();
 		  }
 		  catch (IOException e) {
-			  //this.logger.error(e.getMessage());
+			  this.logger.error(e.getMessage());
 			  return false;
 		  }
 		  return this._bulkInsertData(indexName, xContentBuilder);
@@ -251,11 +220,11 @@ public class ESControlImp extends ESControl{
 	                return true;
 	            }
 	            else {
-	                //this.logger.error(bulkResponse.buildFailureMessage());
+	                this.logger.error(bulkResponse.buildFailureMessage());
 	            }
 	        }
 	        catch (Exception e) {
-	            //this.logger.error(e.getMessage());
+	            this.logger.error(e.getMessage());
 	        }
 	        return false;
 	}
@@ -264,7 +233,7 @@ public class ESControlImp extends ESControl{
             return "";
         }
         if (MySearchOption.isDate(values[0])) {
-            //this.logger.warn("[" + values[0].toString() + "] formatDate");
+            this.logger.warn("[" + values[0].toString() + "] formatDate");
             return MySearchOption.formatDate(values[0]);
         }
         String formatValue = values[0].toString();
@@ -290,46 +259,53 @@ public class ESControlImp extends ESControl{
 
 
 //根据内容_id进行局部字段更新
-	public boolean update(String indexName,String indexType,String _id,HashMap<String,Object[]> newContentMap) throws InterruptedException, ExecutionException{
-		UpdateRequest updateRequest = new UpdateRequest(indexName,indexType,_id);
-		try {
-			XContentBuilder xc = XContentFactory.jsonBuilder().startObject();
-			for (Entry<String,Object[]> colunm : newContentMap.entrySet()) {
-				Object[] ob = colunm.getValue();
-				String field = colunm.getKey();
-				if(1 == ob.length)
-				{
-					xc.field(field, ob[0]);
-				}
-				else if(1 < ob.length)
-				{
-				   xc.array(field, ob);
-				}
-			}
-			xc.endObject();
-			updateRequest.doc(xc);	
-				this.ESClient.update(updateRequest).get();		
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return true;
-	}
-  public boolean deleteIndexName(String indexName)
+//	public boolean update(String indexName
+//			,String indexType
+//			,String _id,HashMap<String,Object[]> newContentMap
+//			) {
+//		UpdateRequest updateRequest = new UpdateRequest(indexName,indexType,_id);
+//		try {
+//			XContentBuilder xc = XContentFactory.jsonBuilder().startObject();
+//			for (Entry<String,Object[]> colunm : newContentMap.entrySet()) {
+//				Object[] ob = colunm.getValue();
+//				String field = colunm.getKey();
+//				if(1 == ob.length){
+//					xc.field(field, ob[0]);
+//				}
+//				else if(1 < ob.length){
+//				   xc.array(field, ob);
+//				}
+//			}
+//			xc.endObject();
+//			updateRequest.doc(xc);	
+//				try {
+//					this.ESClient.update(updateRequest).get();
+//				} catch (InterruptedException | ExecutionException e) {
+//					// TODO Auto-generated catch block
+//					this.logger.error(e.getMessage());
+//				}		
+//			
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			this.logger.error(e.getMessage());
+//		}
+//		
+//		return true;
+//	}
+	
+  public boolean deleteIndexByName(String indexName)
   {		 try{
 			  DeleteIndexResponse delete = this.ESClient
 					  .admin().indices().delete(new DeleteIndexRequest(indexName)).actionGet();
 			  if (!delete.isAcknowledged()) {
-				   //this.logger.error(indexName+ " wasn't deleted");
+				   this.logger.error(indexName+ " wasn't deleted");
 				   return false;
 				}
 			  else return true;		
   		}
   		catch(Exception e)
   		{
-  			//this.logger.error(e.getMessage());
+  			this.logger.error(e.getMessage());
   			return false;
   		}
   }
@@ -341,14 +317,13 @@ public class ESControlImp extends ESControl{
 			  .admin().indices().deleteTemplate(
 					  new DeleteIndexTemplateRequest(deleteIndexTemplateName)).actionGet();
 	  if (!delete.isAcknowledged()) {
-		   //this.logger.error(deleteIndexTemplateName + " wasn't deleted");
+		   this.logger.error(deleteIndexTemplateName + " wasn't deleted");
 		   return false;
 		}
 	  else return true;	
 	  }
-	  catch(Exception e)
-	  {
-		  //this.logger.error(e.getMessage());
+	  catch(Exception e) {
+		 this.logger.error(e.getMessage());
 	  }
 	  return false;
   }
@@ -358,7 +333,7 @@ public class ESControlImp extends ESControl{
 		CreateIndexResponse create = this.ESClient.admin().indices().create(
 				new CreateIndexRequest(indexName)).actionGet();
 		if (!create.isAcknowledged()) {
-			   //this.logger.error(indexName  +" was created");
+			  this.logger.error(indexName  +" was created");
 			   return false;
 			}
 		  else return true;	

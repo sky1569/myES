@@ -12,7 +12,7 @@ import java.util.Vector;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.joda.time.DateTime;
@@ -27,8 +27,8 @@ public class DBServiceImp implements DBService{
 	private DBConfigure dbC;
 	private Connection conn;
 	private Statement stmt,stmt2,stmtMax;
-	private Logger logger = Logger.getLogger(DBServiceImp.class);
-	//private int maxRecoder = 4000;
+	private Logger logger = Logger.getLogger("DAO.DBServiceImp");
+
 
 	public static DBServiceImp  getDBServiceImp()	{
 		if(ds == null)
@@ -36,11 +36,6 @@ public class DBServiceImp implements DBService{
 			ds = new DBServiceImp();
 		}
 		return ds;
-	}
-
-	private DBServiceImp(){
-		
-	//	PropertyConfigurator.configure("/home/sky/workspace/com.D-media.keyanpai/log4j.properties") ;
 	}
 
 	public boolean DBSetter(DBConfigure dbConfigure) {

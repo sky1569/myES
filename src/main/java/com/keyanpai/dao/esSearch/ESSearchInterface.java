@@ -11,16 +11,6 @@ import com.keyanpai.common.MySearchOption.SearchLogic;
 public interface ESSearchInterface {
 	/**
 	 * 
-	 * @param clusterList
-	 * @param indexName
-	 * @param indexType
-	 * @return
-	 */
-//	 boolean searchConfigure(
-//			 Client esClient);
-	
-	/**
-	 * 
 	 * @param indexNames
 	 * @param searchContentMap
 	 * @param searchLogic
@@ -32,10 +22,14 @@ public interface ESSearchInterface {
 	 * @param sortType
 	 * @return
 	 */
-	 List<Map<String, Object>> search(String[] indexNames
-            , HashMap<String, Object[]> searchContentMap, SearchLogic searchLogic
-            , @Nullable HashMap<String, Object[]> filterContentMap, @Nullable SearchLogic filterLogic
-            , int from, int offset, @Nullable String sortField, @Nullable String sortType);
+	 List<Map<String, Object>> simpleSearch(String[] indexNames
+            , HashMap<String, Object[]> searchContentMap
+            , SearchLogic searchLogic
+            , @Nullable HashMap<String, Object[]> filterContentMap
+            , @Nullable SearchLogic filterLogic
+            , int from, int offset
+            , @Nullable String sortField
+            , @Nullable String sortType);
 	
 	/**
 	 * 
@@ -46,29 +40,32 @@ public interface ESSearchInterface {
 	 * @param filterLogic
 	 * @return
 	 */
-	 long getCount(String[] indexNames,HashMap<String,Object[]> searchContentMap
-			,SearchLogic searchLogic,@Nullable HashMap<String,Object[]> filterContentMap
-			,@Nullable SearchLogic filterLogic);
-	/**
-	 * 
-	 * @param indexNames
-	 * @param filedName
-	 * @param value
-	 * @param count
-	 * @return
-	 */
-	List<Map<String ,Object> > getSuggest(
-			String[] indexNames,String filedName,String value,int count); 
-	/**
-	 * 
-	 * @param indexName
-	 * @param mustSearchContentMap
-	 * @param shouldSearchContentMap
-	 * @param groupFields
-	 * @return
-	 */
-    Map<String, String> group(String indexName
-	            , HashMap<String, Object[]> mustSearchContentMap
-	            , HashMap<String, Object[]> shouldSearchContentMap
-	            , String[] groupFields);
+	 long getCount(String[] indexNames
+			 ,HashMap<String,Object[]> searchContentMap
+			 ,SearchLogic searchLogic
+			 ,@Nullable HashMap<String,Object[]> filterContentMap
+			 ,@Nullable SearchLogic filterLogic);
+//	/**
+//	 * 
+//	 * @param indexNames//	 * @param filedName
+//	 * @param value
+//	 * @param count
+//	 * @return
+//	 */
+//	List<Map<String ,Object> > getSuggest(String[] indexNames
+//			,String filedName
+//			,String value
+//			,int count); 
+//	/**
+//	 * 
+//	 * @param indexName
+//	 * @param mustSearchContentMap
+//	 * @param shouldSearchContentMap
+//	 * @param groupFields
+//	 * @return
+//	 */
+//    Map<String, String> group(String indexName
+//	            , HashMap<String, Object[]> mustSearchContentMap
+//	            , HashMap<String, Object[]> shouldSearchContentMap
+//	            , String[] groupFields);
 }

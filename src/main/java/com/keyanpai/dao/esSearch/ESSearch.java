@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.client.Client;
+
 import org.elasticsearch.common.Nullable;
 
 import com.keyanpai.common.MySearchOption.SearchLogic;

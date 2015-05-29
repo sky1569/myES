@@ -1,9 +1,9 @@
 package com.keyanpai.dao.esStats;
 
-import keyanpai.ResourceLoader;
+
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -21,8 +21,7 @@ public class ESStatsImp extends ESStats{
 	
 	
 	public ESStatsImp(Client esClient)	{
-		this.ESClient = esClient;	
-		//PropertyConfigurator.configure(ResourceLoader.loadLog4jProperties("log4j.properties")) ;
+		this.ESClient = esClient;			
 	}	
 
 	public long getCount(String fieldName)

@@ -3,43 +3,38 @@ package com.keyanpai.servlet.account;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+
 
 import com.keyanpai.common.DBConfigure;
+import com.keyanpai.common.esClient.ESClient;
 import com.keyanpai.dao.db.DBServiceImp;
 import com.keyanpai.dao.esControl.ESControlImp;
-import com.keyanpai.dao.esControl.ESControlInterface;
 
 
-public class AdminAccount extends UserAccount implements ESControlInterface {
-//	private ESClientImp esClient = null;
-	private ESControlImp esControlImp = new ESControlImp();
-	private Logger logger = Logger.getLogger(AdminAccount.class);
+
+public class AdminAccount extends UserAccount implements AccountControlInterface {
+
+	private ESControlImp esControlImp = new ESControlImp(this.esClient.getClient());
+	private Logger logger = Logger.getLogger("BUS.Admin");	
 	
-	public AdminAccount(){}
 	public AdminAccount(String id
 					   ,String ip
 					   ,String name
 					   ,String password
+					   ,ESClient es
 					   )
-	{	super(id, ip, name, password);
-		//PropertyConfigurator.configure("../resources/log4j.properties") ;
+	{		
+		super(id,ip,name,password,es);
 	}	
-	
-
-
 	public boolean bulkInsert(DBConfigure dbConfigure) {
 		// TODO Auto-generated method stub
 		DBServiceImp dbServiceImp = DBServiceImp.getDBServiceImp();
 		try{			
-					
-			this.esControlImp.controlConfigure(esClient.getClient());
 			dbServiceImp.DBSetter(dbConfigure);
 			dbServiceImp.open();							
 			return dbServiceImp.handlData(this.esControlImp);
 		}
-		catch(Exception e)
-		{
+		catch(Exception e){
 			this.logger.error(e.getMessage());
 		}
 		finally{
@@ -47,66 +42,40 @@ public class AdminAccount extends UserAccount implements ESControlInterface {
 		}
 		return false;
 	}
+	public boolean bulkDelete(String[] indexName,
+			HashMap<String, Object[]> contentMap) {
+		// TODO Auto-generated method stub					
+		return this.esControlImp.bulkDelete(indexName, contentMap);	
+	}
 
 
    public boolean bulkUpdate(String indexName,
 			HashMap<String, Object[]> oldContentMap,
 			HashMap<String, Object[]> newContentMap) {
 		// TODO Auto-generated method stub	
-	     try{
-		
-			   this.esControlImp.controlConfigure(esClient.getClient());		
-			   return this.esControlImp.bulkUpdate(indexName, oldContentMap, newContentMap);
-		    }
-			catch(Exception e)
-			{
-				this.logger.error(e.getMessage());
-			}
-			return false;
-			}
+	   return this.esControlImp.bulkUpdate(indexName, oldContentMap, newContentMap);
+   }
 
-	public boolean bulkDelete(String[] indexName,
-			HashMap<String, Object[]> contentMap) {
-		// TODO Auto-generated method stub
-		try{			
-			this.esControlImp.controlConfigure(esClient.getClient());					
-			return this.esControlImp.bulkDelete(indexName, contentMap);
-			}
-		catch(Exception e)
-		{
-			this.logger.error(e.getMessage());
-		}
-		return false;
+	public boolean deleteIndexByName(String indexName) {
+		// TODO Auto-generated method stub		
+		return this.esControlImp.deleteIndexByName(indexName);
 	}
-
-
-
-
-
 
 	public boolean creatIndex(String indexName) {
-		// TODO Auto-generated method stub
-		this.esControlImp.controlConfigure(esClient.getClient());
-		return this.esControlImp.creatIndex( indexName);
-		 
-	}
-	public boolean creatIndexTemplate(String templatePath, String indexTemplateName,
-			String indexType) {
-		// TODO Auto-generated method stub
-		this.esControlImp.controlConfigure(esClient.getClient());
-		return this.esControlImp.creatIndexTemplate(templatePath, indexTemplateName, indexType);
-		 
+		// TODO Auto-generated method stub		
+		return this.esControlImp.creatIndex( indexName);		 
 	}
 
-	public boolean deleteIndex(String indexName) {
-		// TODO Auto-generated method stub
-		this.esControlImp.controlConfigure(esClient.getClient());
-		return this.esControlImp.deleteIndexName(indexName);
+	public boolean creatIndexTemplate(String templatePath, String indexTemplateName,
+			String indexType) {
+		// TODO Auto-generated method stub		
+		return this.esControlImp.creatIndexTemplate(templatePath, indexTemplateName, indexType);		 
 	}
+
+
 
 	public boolean deleteIndexTemplate(String indexNameTemplate) {
 		// TODO Auto-generated method stub
-		this.esControlImp.controlConfigure(esClient.getClient());
 		return this.esControlImp.deleteIndexTemplate(indexNameTemplate);
 	}
 
@@ -114,9 +83,6 @@ public class AdminAccount extends UserAccount implements ESControlInterface {
 //			List<String> clusterList,String indexName
 //			,String indexType,String _id,HashMap<String ,Object[]> newContentMap)
 //	{
-//		System.out.println(this.getName()+":update!");		
-//	
-//		this.esControlImp.controlConfigure(esClient.getClient());
 //		try {
 //			this.esControlImp.update(indexName, indexType, _id, newContentMap);
 //			

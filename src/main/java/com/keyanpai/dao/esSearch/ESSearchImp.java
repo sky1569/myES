@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import keyanpai.ResourceLoader;
+
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -23,7 +23,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryFilterBuilder;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.facet.FacetBuilders;
+
 
 import com.keyanpai.common.ESCreatQueryBuilder;
 import com.keyanpai.common.MySearchOption;
@@ -31,25 +31,25 @@ import com.keyanpai.common.MySearchOption.DataFilter;
 import com.keyanpai.common.MySearchOption.SearchLogic;
 
 
-public class ESSearchImp extends ESSearch {
+public class ESSearchImp implements ESSearchInterface {
 	
 	private Client ESClient = null;
-	private Logger logger = Logger.getLogger(ESSearchImp.class);	
+	private Logger logger = Logger.getLogger("DAO.ESSearchImp");	
 	public ESSearchImp(Client ESClient){	
-		this.ESClient = ESClient;
-	//	PropertyConfigurator.configure(ResourceLoader.loadLog4jProperties("log4j.properties")) ;
+		this.ESClient = ESClient;	
 	}	
 	private ESCreatQueryBuilder esCreatQueryBuilder = new  ESCreatQueryBuilder();
 	
 
-	public List<Map<String, Object>> simpleSearch(String[] indexNames,
-			HashMap<String, Object[]> searchContentMap,
-			SearchLogic searchLogic,
-			HashMap<String, Object[]> filterContentMap,
-			SearchLogic filterLogic, int from, int offset, String sortField,
-			String sortType) {
-		// TODO Auto-generated method stub
-		
+	public List<Map<String, Object>> simpleSearch(String[] indexNames
+			,HashMap<String, Object[]> searchContentMap
+			,SearchLogic searchLogic
+			,HashMap<String, Object[]> filterContentMap
+			,SearchLogic filterLogic
+			,int from, int offset
+			,String sortField
+			,String sortType) {
+		// TODO Auto-generated method stub		
 		if(offset <= 0){
 			return null;
 		}
@@ -87,56 +87,6 @@ public class ESSearchImp extends ESSearch {
 		return null;
 	}
 	
-	
-	
-	public String simpleSearch2(String[] indexNames,
-			HashMap<String, Object[]> searchContentMap,
-			SearchLogic searchLogic,
-			HashMap<String, Object[]> filterContentMap,
-			SearchLogic filterLogic, int from, int offset, String sortField,
-			String sortType) {
-		// TODO Auto-generated method stub
-		
-		if(offset <= 0){
-			return null;
-		}
-		try{
-			QueryBuilder queryBuilder = null;
-			queryBuilder = this.esCreatQueryBuilder.createQueryBuilder(searchContentMap,searchLogic);
-			queryBuilder = this.createFilterBuilder(filterLogic,queryBuilder,searchContentMap
-					,filterContentMap);
-			this.ESClient.admin().cluster().prepareClusterStats().execute().actionGet();
-			SearchRequestBuilder searchRequestBuilder = this.ESClient.prepareSearch(indexNames)
-					.setSearchType(SearchType.DEFAULT).setQuery( queryBuilder).setFrom(from)
-					.setSize(offset).setExplain(true);
-			 if (sortField == null || sortField.isEmpty() 
-					 || sortType == null || sortType.isEmpty()) {
-				 /* 不需要排序*/
-				 }
-			 else {
-				 /*需要排序*/
-				 org.elasticsearch.search.sort.SortOrder sortOrder = sortType.equals("desc") ? 
-						 org.elasticsearch.search.sort.SortOrder.DESC 
-						 : org.elasticsearch.search.sort.SortOrder.ASC;	 
-				 searchRequestBuilder = searchRequestBuilder.addSort(sortField, sortOrder);
-			 }
-//			 searchRequestBuilder = this.createHighlight(searchRequestBuilder, searchContentMap);
-			 this.logger.debug(searchRequestBuilder.toString());
-			 SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
-			
-			 return searchResponse.getHits().toString();
-		}
-		catch(Exception e)
-    	{
-    		 this.logger.error(e.getMessage());
-    	}
-		
-		return null;
-	}
-	
-	
-	
-	
 	private List<Map<String, Object>> getSearchResult(
 			SearchResponse searchResponse) {
 		// TODO Auto-generated method stub
@@ -154,18 +104,19 @@ public class ESSearchImp extends ESSearch {
 //				 Map<String, HighlightField> highlightMap = searchHit.highlightFields();
 //				 Iterator<Entry<String, HighlightField>> highlightIterator = highlightMap
 //						 .entrySet().iterator();
+//				 
 //				while (highlightIterator.hasNext()) {
 //					   Entry<String, HighlightField> entry = highlightIterator.next();
 //					   Object[] contents = entry.getValue().fragments();
 //					   if (contents.length == 1) {
 //						   resultMap.put(entry.getKey(), contents[0].toString());
-//						   System.out.println(contents[0].toString());						   
+//						   System.out.println("!!!"+contents[0].toString());						   
 //					   }
 //					   else {
-//						   this.logger.warn("搜索结果中的高亮结果出现多数据contents.length = " + contents.length);
+//						   System.out.println("搜索结果中的高亮结果出现多数据contents.length = " + contents.length);
 //					   }
 //				}
-				  System.out.println(resultMap.toString());		
+				 this.logger.debug(resultMap.toString());		
 				resultList.add(resultMap);
 			}
 		 return resultList;
@@ -296,23 +247,6 @@ public class ESSearchImp extends ESSearch {
 		return null;
 		
 }
-
-	public List<Map<String, Object>> getSuggest(String[] indexNames,
-			String filedName, String value, int count) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	Map<String, String> group(String indexName,
-			HashMap<String, Object[]> mustSearchContentMap,
-			HashMap<String, Object[]> shouldSearchContentMap,
-			String[] groupFields) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 	
 //	 private Map<String, String> _group(String indexName, QueryBuilder queryBuilder, String[] groupFields) {
 //	        try {
