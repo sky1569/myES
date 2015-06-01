@@ -1,4 +1,4 @@
-package com.keyanpai.dao.esStats;
+package com.keyanpai.service.esStats;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.aggregations.metrics.MetricsAggregationBuilder;

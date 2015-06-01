@@ -1,4 +1,4 @@
-package com.keyanpai.dao.esSearch;
+package com.keyanpai.service.esSearch;
 
 import java.util.HashMap;
 import java.util.List;

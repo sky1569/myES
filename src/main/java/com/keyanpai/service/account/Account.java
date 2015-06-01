@@ -1,4 +1,4 @@
-package com.keyanpai.servlet.account;
+package com.keyanpai.service.account;
 
 public class Account {
 

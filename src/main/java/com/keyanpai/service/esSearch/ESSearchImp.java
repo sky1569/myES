@@ -1,4 +1,4 @@
-package com.keyanpai.dao.esSearch;
+package com.keyanpai.service.esSearch;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,12 +9,13 @@ import java.util.Map.Entry;
 
 
 
-import org.apache.log4j.Logger;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
+
+
+
+
+import org.apache.log4j.Logger;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.ExistsFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
@@ -23,25 +24,32 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryFilterBuilder;
 import org.elasticsearch.search.SearchHit;
-
-
 import com.keyanpai.common.ESCreatQueryBuilder;
 import com.keyanpai.common.MySearchOption;
 import com.keyanpai.common.MySearchOption.DataFilter;
 import com.keyanpai.common.MySearchOption.SearchLogic;
+import com.keyanpai.dao.esClient.CommonPool2;
+import com.keyanpai.dao.esClient.ESClientImp;
 
 
 public class ESSearchImp implements ESSearchInterface {
 	
-	private Client ESClient = null;
-	private Logger logger = Logger.getLogger("DAO.ESSearchImp");	
-	public ESSearchImp(Client ESClient){	
-		this.ESClient = ESClient;	
-	}	
-	private ESCreatQueryBuilder esCreatQueryBuilder = new  ESCreatQueryBuilder();
 	
+	private CommonPool2 cp2 = CommonPool2.getCommonPool2() ;
+	private ESCreatQueryBuilder esCreatQueryBuilder = null;
+	private Logger logger = Logger.getLogger("Service.ESSearchImp");	
 
-	public List<Map<String, Object>> simpleSearch(String[] indexNames
+	public ESCreatQueryBuilder getEsCreatQueryBuilder() {
+		return esCreatQueryBuilder;
+	}
+	public void setEsCreatQueryBuilder(ESCreatQueryBuilder esCreatQueryBuilder) {
+		this.esCreatQueryBuilder = esCreatQueryBuilder;
+	}
+	public void setCommonPool2(CommonPool2 cp2) {		
+			this.cp2 = cp2;
+	}
+
+	public List<Map<String, Object>> simpleSearch(String[] indexNames,String[] indexTypes
 			,HashMap<String, Object[]> searchContentMap
 			,SearchLogic searchLogic
 			,HashMap<String, Object[]> filterContentMap
@@ -53,40 +61,24 @@ public class ESSearchImp implements ESSearchInterface {
 		if(offset <= 0){
 			return null;
 		}
-		try{
 			QueryBuilder queryBuilder = null;
 			queryBuilder = this.esCreatQueryBuilder.createQueryBuilder(searchContentMap,searchLogic);
 			queryBuilder = this.createFilterBuilder(filterLogic,queryBuilder,searchContentMap
 					,filterContentMap);
-			this.ESClient.admin().cluster().prepareClusterStats().execute().actionGet();
-			SearchRequestBuilder searchRequestBuilder = this.ESClient.prepareSearch(indexNames)
-					.setSearchType(SearchType.DEFAULT).setQuery( queryBuilder).setFrom(from)
-					.setSize(offset).setExplain(true);
-			 if (sortField == null || sortField.isEmpty() 
-					 || sortType == null || sortType.isEmpty()) {
-				 /* 不需要排序*/
-				 }
-			 else {
-				 /*需要排序*/
-				 org.elasticsearch.search.sort.SortOrder sortOrder = sortType.equals("desc") ? 
-						 org.elasticsearch.search.sort.SortOrder.DESC 
-						 : org.elasticsearch.search.sort.SortOrder.ASC;	 
-				 searchRequestBuilder = searchRequestBuilder.addSort(sortField, sortOrder);
-			 }
-//			 searchRequestBuilder = this.createHighlight(searchRequestBuilder, searchContentMap);
-			 this.logger.debug(searchRequestBuilder.toString());
-			 SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
-			
-			 return this.getSearchResult(searchResponse);
-		}
-		catch(Exception e)
-    	{
-    		 this.logger.error(e.getMessage());
-    	}
-		
+			ESClientImp esClient = null;
+			try{
+				esClient = cp2.borrowObject();
+				return this.getSearchResult(esClient.query(queryBuilder, indexNames, indexTypes, from, offset, sortField, sortType));
+			}
+			catch(Exception e){
+				this.logger.error(e.getMessage());
+			}
+			finally{
+				cp2.returnObject(esClient);
+			}		
 		return null;
 	}
-	
+
 	private List<Map<String, Object>> getSearchResult(
 			SearchResponse searchResponse) {
 		// TODO Auto-generated method stub
@@ -96,7 +88,7 @@ public class ESSearchImp implements ESSearchInterface {
 				Iterator<Entry<String, Object>> iterator = searchHit.getSource()
 						.entrySet().iterator();
 				HashMap<String,Object> resultMap = new HashMap<String,Object>();
-					resultMap.put("uuid", searchHit.getId());
+					resultMap.put("uuid", searchHit.getId()+searchHit.getType());
 				while(iterator.hasNext()){
 					Entry<String, Object> entry = iterator.next();
 					resultMap.put(entry.getKey(), entry.getValue());
@@ -206,48 +198,38 @@ public class ESSearchImp implements ESSearchInterface {
 	return true;
 	}
 
-	public long getCount(String[] indexNames,
-			HashMap<String, Object[]> searchContentMap,
-			SearchLogic searchLogic,
-			HashMap<String, Object[]> filterContentMap, SearchLogic filterLogic) {
+	public long getCount(String[] indexNames,String[] indexTypes
+			,HashMap<String, Object[]> searchContentMap
+			,SearchLogic searchLogic
+			,HashMap<String, Object[]> filterContentMap
+			,SearchLogic filterLogic
+			) {
 		// TODO Auto-generated method stub
-		QueryBuilder queryBuilder = null;
-		 try {
-			 queryBuilder = this.esCreatQueryBuilder.createQueryBuilder(searchContentMap, searchLogic);
-			 queryBuilder = this.createFilterBuilder(searchLogic, queryBuilder, searchContentMap, filterContentMap);
-			 SearchResponse searchResponse = this.searchCountRequest(indexNames, queryBuilder);
-			 return searchResponse.getHits().totalHits();
-		 }
-		 catch(Exception e)
-		 {
-			 this.logger.error(e.getMessage());
-		 }
+		QueryBuilder queryBuilder = null;		
+		queryBuilder = this.esCreatQueryBuilder.createQueryBuilder(searchContentMap,searchLogic);
+		queryBuilder = this.createFilterBuilder(filterLogic,queryBuilder,searchContentMap
+						,filterContentMap);
+				
+		ESClientImp esClient = null;
+		try{
+			esClient = cp2.borrowObject();
+			return esClient.query(
+							 queryBuilder, indexNames, indexTypes, 0, 1, null, null)
+							 .getHits().totalHits();
+		}
+		catch(Exception e){
+				this.logger.error(e.getMessage());
+		}
+		finally{
+				cp2.returnObject(esClient);
+		}			
+		
+	
+	
 		return 0;
 		
 	}
 
-	private SearchResponse searchCountRequest(String[] indexNames,
-			QueryBuilder queryBuilder) {
-		// TODO Auto-generated method stub
-		try{
-		
-			SearchRequestBuilder searchRequestBuilder = this.ESClient
-					.prepareSearch(indexNames).setSearchType(SearchType.COUNT);
-			if (queryBuilder instanceof QueryBuilder) {
-				 searchRequestBuilder = searchRequestBuilder.setQuery((QueryBuilder)queryBuilder);
-				 this.logger.debug(searchRequestBuilder.toString());
-				}
-	
-			return searchRequestBuilder.execute().actionGet();
-		 }
-		catch(Exception e)
-		{
-			this.logger.error(e.getMessage());
-		}
-		return null;
-		
-}
-	
 //	 private Map<String, String> _group(String indexName, QueryBuilder queryBuilder, String[] groupFields) {
 //	        try {
 //	            TermsFacetBuilder termsFacetBuilder = FacetBuilders.termsFacet("group").fields(groupFields).size(9999);

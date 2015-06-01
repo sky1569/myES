@@ -12,13 +12,12 @@ import java.util.Vector;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
-
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.joda.time.DateTime;
 
 import com.keyanpai.common.DBConfigure;
-import com.keyanpai.dao.esControl.ESControlImp;
+import com.keyanpai.service.esControl.ESControlImp;
 import com.mysql.jdbc.Connection;
 import com.mysql.jdbc.Statement;
 
@@ -26,7 +25,7 @@ public class DBServiceImp implements DBService{
 	private static DBServiceImp ds = null;
 	private DBConfigure dbC;
 	private Connection conn;
-	private Statement stmt,stmt2,stmtMax;
+	private Statement stmt,stmtSimple,stmtComplex,stmtMax;
 	private Logger logger = Logger.getLogger("DAO.DBServiceImp");
 
 
@@ -154,7 +153,7 @@ public class DBServiceImp implements DBService{
 				+ "." + tableName +" where " + this.dbC.getDatabaseName() + "." + tableName + "." + uniqFieldName + " = \'" + uniqId +"\'";
 		ResultSet rs;
 		try {
-			rs = stmt2.executeQuery(sql);			
+			rs = stmtComplex.executeQuery(sql);			
 			 Object[] ob = _getComplexArray(rs,feildName,  columnsNum);		
 			xc.array(feildName,ob);
 		} catch (Exception e) {
@@ -199,7 +198,7 @@ public class DBServiceImp implements DBService{
 				+ "." + tableName +" where " + this.dbC.getDatabaseName() + "." + tableName + "." + uniqField + " = \'" + uniqId +"\'";
 		ResultSet rs;
 		try {
-			rs = stmt2.executeQuery(sql);			
+			rs = stmtSimple.executeQuery(sql);			
 			 Object[] ob = _getSimpleArray(rs,feildName);		
 			xc.array(feildName,ob);
 		} catch (Exception e) {
@@ -286,7 +285,8 @@ public class DBServiceImp implements DBService{
 			 //主表查询操作
 			 stmt = (Statement) conn.createStatement();
 			 //辅表查询操作
-			 stmt2 = (Statement) conn.createStatement();
+			 stmtSimple = (Statement) conn.createStatement();
+			 stmtComplex = (Statement) conn.createStatement();
 			 //复杂辅表字段个数操作
 			 stmtMax = (Statement) conn.createStatement();
 		}
@@ -329,8 +329,10 @@ public class DBServiceImp implements DBService{
 		try {
 			if(!this.stmt.isClosed())
 				this.stmt.close();
-			if(!this.stmt2.isClosed())
-				this.stmt2.close();
+			if(!this.stmtSimple.isClosed())
+				this.stmtSimple.close();
+			if(!this.stmtComplex.isClosed())
+				this.stmtComplex.close();
 			if(!this.stmtMax.isClosed())
 				this.stmtMax.close();
 			if(!this.conn.isClosed())

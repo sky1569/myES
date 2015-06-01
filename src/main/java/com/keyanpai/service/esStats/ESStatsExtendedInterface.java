@@ -1,4 +1,4 @@
-package com.keyanpai.dao.esStats;
+package com.keyanpai.service.esStats;
 
 public interface ESStatsExtendedInterface {
 

@@ -1,30 +1,32 @@
-package com.keyanpai.servlet.account;
+package com.keyanpai.service.account;
 
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.keyanpai.common.DBConfigure;
-import com.keyanpai.common.esClient.ESClient;
 import com.keyanpai.dao.db.DBServiceImp;
-import com.keyanpai.dao.esControl.ESControlImp;
+import com.keyanpai.service.esControl.ESControlImp;
 
 
 
 public class AdminAccount extends UserAccount implements AccountControlInterface {
 
-	private ESControlImp esControlImp = new ESControlImp(this.esClient.getClient());
-	private Logger logger = Logger.getLogger("BUS.Admin");	
-	
+	private ESControlImp esControlImp = null;
+	private Logger logger = Logger.getLogger("Service.Admin");	
+	public AdminAccount(){
+//		BeanFactory beanFactory = new ClassPathXmlApplicationContext("beans.xml");
+//		esControlImp  =  beanFactory.getBean("esControlImp",ESControlImp.class );
+	}
 	public AdminAccount(String id
 					   ,String ip
 					   ,String name
-					   ,String password
-					   ,ESClient es
+					   ,String password				
 					   )
 	{		
-		super(id,ip,name,password,es);
+		super(id,ip,name,password);
 	}	
 	public boolean bulkInsert(DBConfigure dbConfigure) {
 		// TODO Auto-generated method stub
@@ -42,10 +44,10 @@ public class AdminAccount extends UserAccount implements AccountControlInterface
 		}
 		return false;
 	}
-	public boolean bulkDelete(String[] indexName,
+	public boolean bulkDelete(String[] indexNames,String[] indexTypes,
 			HashMap<String, Object[]> contentMap) {
 		// TODO Auto-generated method stub					
-		return this.esControlImp.bulkDelete(indexName, contentMap);	
+		return this.esControlImp.bulkDelete(indexNames, indexTypes, contentMap);	
 	}
 
 
@@ -53,12 +55,14 @@ public class AdminAccount extends UserAccount implements AccountControlInterface
 			HashMap<String, Object[]> oldContentMap,
 			HashMap<String, Object[]> newContentMap) {
 		// TODO Auto-generated method stub	
-	   return this.esControlImp.bulkUpdate(indexName, oldContentMap, newContentMap);
+//	   return this.esControlImp.bulkUpdate(indexName, oldContentMap, newContentMap);
+	   this.logger.error("还没这功能");
+	   return false;
    }
 
-	public boolean deleteIndexByName(String indexName) {
+	public boolean deleteIndexByName(String[] indexNames) {
 		// TODO Auto-generated method stub		
-		return this.esControlImp.deleteIndexByName(indexName);
+		return this.esControlImp.deleteIndexByName(indexNames);
 	}
 
 	public boolean creatIndex(String indexName) {
@@ -69,7 +73,9 @@ public class AdminAccount extends UserAccount implements AccountControlInterface
 	public boolean creatIndexTemplate(String templatePath, String indexTemplateName,
 			String indexType) {
 		// TODO Auto-generated method stub		
-		return this.esControlImp.creatIndexTemplate(templatePath, indexTemplateName, indexType);		 
+		//	return this.esControlImp.creatIndexTemplate(templatePath, indexTemplateName, indexType);		 
+		this.logger.error("还没这功能");
+		   return false;
 	}
 
 

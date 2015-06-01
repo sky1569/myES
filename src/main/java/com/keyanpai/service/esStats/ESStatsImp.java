@@ -1,4 +1,4 @@
-package com.keyanpai.dao.esStats;
+package com.keyanpai.service.esStats;
 
 
 
@@ -17,12 +17,8 @@ import org.elasticsearch.search.aggregations.metrics.sum.Sum;
 
 public class ESStatsImp extends ESStats{
 	private Client ESClient = null;	
-	private Logger logger = Logger.getLogger(ESStatsImp.class);
+	private Logger logger = Logger.getLogger("Service.ESStatsImp");
 	
-	
-	public ESStatsImp(Client esClient)	{
-		this.ESClient = esClient;			
-	}	
 
 	public long getCount(String fieldName)
 	{
@@ -83,8 +79,7 @@ public class ESStatsImp extends ESStats{
 			Avg avg = sr.getAggregations().get("by_avg");		
 			return avg.getValue();
 		}
-		catch(Exception e)
-		{
+		catch(Exception e){
 			this.logger.error(e.getMessage());
 		}		
 		return 0;

@@ -14,7 +14,8 @@ import com.keyanpai.common.MySearchOption.SearchLogic;
 
 
 public class ESCreatQueryBuilder {
-	private Logger logger = Logger.getLogger("DAO.ESCreatQueryBuilder");	
+	private Logger logger = Logger.getLogger("Service.ESCreatQueryBuilder");	
+	public ESCreatQueryBuilder(){System.out.println("this is ESCreatQueryBuilder");}
 	public QueryBuilder createQueryBuilder(
 			HashMap<String, Object[]> searchContentMap, SearchLogic searchLogic) {
 		// TODO Auto-generated method stub
@@ -65,9 +66,9 @@ public class ESCreatQueryBuilder {
 				BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 				 for (Object valueItem : values) {
 					 if (valueItem instanceof MySearchOption) {
-						 continue;
-						 
-					 }else System.out.println(valueItem);
+						 continue;						 
+					 }
+					 
 					 QueryBuilder queryBuilder = null;
 					 String formatValue = valueItem.toString().trim().replace("*", "");//格式化搜索数据
 			

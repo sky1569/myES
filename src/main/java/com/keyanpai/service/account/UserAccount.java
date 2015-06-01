@@ -1,19 +1,22 @@
-package com.keyanpai.servlet.account;
+package com.keyanpai.service.account;
 
 
-import com.keyanpai.common.esClient.ESClient;
-import com.keyanpai.dao.esStats.ESStatsImp;
+
+import com.keyanpai.service.esStats.ESStatsImp;
 
 public class UserAccount extends GuestAccount implements AccountStatsInterface {
-	public ESStatsImp esStatsImp = new ESStatsImp(esClient.getClient());
+	public ESStatsImp esStatsImp = null;
 	
+	public UserAccount(){		
+//		BeanFactory beanFactory = new ClassPathXmlApplicationContext("beans.xml");
+//		esStatsImp  =  beanFactory.getBean("esStatsImp",ESStatsImp.class );
+		}
 	public UserAccount(String id
 					   ,String ip
 					   ,String name
 					   ,String password
-					   ,ESClient es)
+					  )
 	{ 
-		super(es);
 		this.setId(id);
 		this.setIp(ip);
 		this.setName(name);

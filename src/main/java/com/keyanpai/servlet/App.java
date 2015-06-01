@@ -1,4 +1,7 @@
-//package com.keyanpai.servlet;
+package com.keyanpai.servlet;
+import com.keyanpai.service.account.GuestAccount;
+
+
 //
 //
 //import java.util.HashMap;
@@ -22,21 +25,16 @@
 // * Hello world!
 // *
 // */
-//public class App 
-//{
-//	
-//    public static void main( String[] args ) 
-//    {
-//        System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );      
-////        AdminAccount aa = new AdminAccount("1","localhost","sky","1206");
-////          List<String> clusterList = new ArrayList<String>();
-////          //clusterList.add("10.107.6.82:9300");
-////          clusterList.add("elasticsearch:127.0.0.1:9300");          
-////          aa.getClientConn(clusterList);
-////          ESSearch(aa);
-////          aa.getClientClosed();
-//    }
-//    
+public class App 
+{
+	
+    public static void main( String[] args ) 
+    {
+        System.out.println( "!!!!!!!!!!!!!Hello World!!!!!!!!!!!!!!!!!" );      
+        
+       
+    }
+}   
 //    
 ////    private static void ESUpdate(final AdminAccount aa){
 ////    	
