@@ -39,7 +39,7 @@ public class ESClientImp implements ESClientInterface{
 	private Client ESClient = null;
 	
 	
-	
+
 	/*连接操作*/
 	public boolean  clientConn()  {
 		  this.logger.info("读取配置文件"); 
@@ -133,7 +133,7 @@ public class ESClientImp implements ESClientInterface{
 			){
 		if(null == queryBuilder || offset <=0 || null == indexNames )
 			return null;
-		 this.logger.debug("dada"+ queryBuilder.toString());
+		 this.logger.debug("queryBuilder"+ queryBuilder.toString());
 		try{
 			this.ESClient.admin().cluster().prepareClusterStats().execute().actionGet();
 			SearchRequestBuilder searchRequestBuilder = this.ESClient.prepareSearch(indexNames).setTypes(indexTypes)

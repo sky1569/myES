@@ -21,7 +21,7 @@ public class ESCreatQueryBuilder {
 		// TODO Auto-generated method stub
 		try{
 			if(searchContentMap == null || searchContentMap.size() == 0){	
-				System.out.println("createQuertBuilder");
+				this.logger.info("searchContentMap缺省");
 				return QueryBuilders.matchAllQuery();				
 			}
 			

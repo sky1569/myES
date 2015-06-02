@@ -134,7 +134,7 @@ public class ESSearchImp implements ESSearchInterface {
 		// TODO Auto-generated method stub
 		if(null == searchContentMap|| searchContentMap.size() == 0)
 		{
-			System.out.println("searchContentMap == null");
+		
 			QueryFilterBuilder queryFilterBuilder = FilterBuilders				
 					.queryFilter(this.esCreatQueryBuilder.createQueryBuilder(filterContentMap, filterLogic));
 			return QueryBuilders.filteredQuery( queryBuilder,queryFilterBuilder);
@@ -230,6 +230,7 @@ public class ESSearchImp implements ESSearchInterface {
 //				 .getHits().totalHits();
 		try{
 			esClient = esClientPoolManager.borrowObject();
+	
 			return esClient.query(
 							 queryBuilder, indexNames, indexTypes, 0, 1, null, null)
 							 .getHits().totalHits();
