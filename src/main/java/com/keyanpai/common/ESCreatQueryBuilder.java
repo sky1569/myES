@@ -15,14 +15,16 @@ import com.keyanpai.common.MySearchOption.SearchLogic;
 
 public class ESCreatQueryBuilder {
 	private Logger logger = Logger.getLogger("Service.ESCreatQueryBuilder");	
-	public ESCreatQueryBuilder(){System.out.println("this is ESCreatQueryBuilder");}
+	public ESCreatQueryBuilder(){}
 	public QueryBuilder createQueryBuilder(
 			HashMap<String, Object[]> searchContentMap, SearchLogic searchLogic) {
 		// TODO Auto-generated method stub
 		try{
-			if(searchContentMap == null || searchContentMap.size() == 0){
-				return null;				
+			if(searchContentMap == null || searchContentMap.size() == 0){	
+				System.out.println("createQuertBuilder");
+				return QueryBuilders.matchAllQuery();				
 			}
+			
 			BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 			Iterator<Entry<String,Object[]>> iterator = searchContentMap.entrySet().iterator();
 			/*循环每一个需要搜索的字段和值*/
@@ -55,6 +57,9 @@ public class ESCreatQueryBuilder {
 			
 		return null;
 	}
+	
+	
+
 
 	private QueryBuilder createSingleFieldQueryBuilder(String field,
 			Object[] values, MySearchOption mySearchOption) {
@@ -165,4 +170,95 @@ public class ESCreatQueryBuilder {
 			return false;
 	return true;
 	}
+	
+	
+
+//		public FilterBuilder createFilterBuilder(
+//				HashMap<String, Object[]> searchContentMap, SearchLogic searchLogic) {
+//			// TODO Auto-generated method stub
+//			try{
+//				if(searchContentMap == null || searchContentMap.size() == 0){
+//					return null;				
+//				}
+//				BoolFilterBuilder boolFilterBuilder = FilterBuilders.boolFilter();
+//				Iterator<Entry<String,Object[]>> iterator = searchContentMap.entrySet().iterator();				
+//				/*循环每一个需要搜索的字段和值*/
+//				while(iterator.hasNext()){
+//					Entry<String,Object[]> entry = iterator.next();
+//					String field =entry.getKey();			
+//					Object[] values = entry.getValue();		
+//					/*排除非法的搜索值*/
+//					if(!this.checkValue(values)){
+//						continue;
+//					}
+//					MySearchOption mySearchOption = this.getSearchOption(values);			
+//					FilterBuilder filterBuilder = this.creatSigngleFiledFilterBuilder(field, values, mySearchOption);
+//					
+//					if(filterBuilder != null)				{
+//						if(searchLogic == SearchLogic.should){
+//							boolFilterBuilder =boolFilterBuilder.should(filterBuilder);
+//						}
+//						else{
+//							boolFilterBuilder = boolFilterBuilder.must(filterBuilder);
+//						}
+//					}
+//				}
+//				return boolFilterBuilder;
+//			}
+//			catch(Exception e){
+//				this.logger.error(e.getMessage());
+//			}
+//				
+//			return null;
+//		}
+//		
+//		private FilterBuilder createSingleFieldFilterBuilder(String field,
+//				Object[] values, MySearchOption mySearchOption) {
+//			// TODO Auto-generated method stub
+//			try{
+//					if(mySearchOption.getSearchType() 
+//							== com.keyanpai.common.MySearchOption.SearchType.range)
+//						return this.createRangeFilterBuilder(field,values);
+//					BoolFilterBuilder boolFilterBuilder = FilterBuilders.boolFilter();
+//					 for (Object valueItem : values) {
+//						 if (valueItem instanceof MySearchOption) {
+//							 continue;						 
+//						 }
+//						 
+//						 FilterBuilder filterBuilder = null;
+//						 String formatValue = valueItem.toString().trim().replace("*", "");//格式化搜索数据
+//				
+//						 if (mySearchOption.getSearchType() 
+//								 == com.keyanpai.common.MySearchOption.SearchType.term) {
+//							 filterBuilder = FilterBuilders.termFilter(field, formatValue);								
+//						 }
+//						 else if (mySearchOption.getSearchType() 
+//								 == com.keyanpai.common.MySearchOption.SearchType.querystring) {
+//			//				 if (formatValue.length() == 1) {
+//			//					 /*如果搜索长度为1的非数字的字符串，格式化为通配符搜索，暂时这样，以后有时间改成multifield搜索，就不需要通配符了*/
+//			//					 if (!Pattern.matches("[0-9]", formatValue)) {
+//			//						 formatValue = "*"+formatValue+"*";							
+//			//					 }
+//			//				 }					
+//							 FilteredQueryBuilder filterQueryBuilder = FilterBuilders.queryFilter(queryBuilder);(formatValue).analyzer("ik")
+//									 .minimumShouldMatch(mySearchOption.getQueryStringPrecision());
+//							 queryBuilder = queryStringQueryBuilder.field(field).boost(mySearchOption.getBoost());
+//							 
+//						 }
+//						 if (mySearchOption.getSearchLogic() == SearchLogic.should) {
+//							   boolQueryBuilder = boolQueryBuilder.should(queryBuilder);
+//						 }
+//						 else{
+//							 boolQueryBuilder = boolQueryBuilder.must(queryBuilder);
+//						 }
+//					 }
+//					return boolQueryBuilder;
+//				}
+//				catch(Exception e)
+//				{
+//					this.logger.error(e.getMessage());
+//				}
+//			return null;
+//					
+//		}
 }

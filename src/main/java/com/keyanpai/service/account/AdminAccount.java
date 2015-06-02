@@ -3,8 +3,7 @@ package com.keyanpai.service.account;
 import java.util.HashMap;
 
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 
 import com.keyanpai.common.DBConfigure;
 import com.keyanpai.dao.db.DBServiceImp;

@@ -7,9 +7,10 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
+
+import com.keyanpai.common.ESClientPoolManager;
 import com.keyanpai.common.ESCreatQueryBuilder;
 import com.keyanpai.common.MySearchOption.SearchLogic;
-import com.keyanpai.dao.esClient.CommonPool2;
 import com.keyanpai.dao.esClient.ESClientImp;
 
 
@@ -18,7 +19,7 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 
 	private ESCreatQueryBuilder esCreatQueryBuilder = null;	
 	private Logger logger = Logger.getLogger("Service.ESControlImp");
-	private CommonPool2 cp2 = CommonPool2.getCommonPool2() ;
+	private ESClientPoolManager esClientPoolManager = null ;
 
 	public ESCreatQueryBuilder getEsCreatQueryBuilder() {
 		return esCreatQueryBuilder;
@@ -26,9 +27,7 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 	public void setEsCreatQueryBuilder(ESCreatQueryBuilder esCreatQueryBuilder) {
 		this.esCreatQueryBuilder = esCreatQueryBuilder;
 	}
-	public void setCommonPool2(CommonPool2 cp2) {		
-		this.cp2 =cp2;
-	}
+
 	
 //	public boolean creatIndexTemplate(String template
 //			,String indexTemplateName
@@ -53,19 +52,25 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 //				}
 //	}
 	
+	public ESClientPoolManager getEsClientPoolManager() {
+		return esClientPoolManager;
+	}
+	public void setEsClientPoolManager(ESClientPoolManager esClientPoolManager) {
+		this.esClientPoolManager = esClientPoolManager;
+	}
 	public boolean bulkInsert(List<XContentBuilder> dataList, 
 			String index_name,String index_type) {
 		// TODO Auto-generated method stub
 		ESClientImp esClient = null;
 		try {			
-			 esClient = cp2.borrowObject();
+			 esClient = esClientPoolManager.borrowObject();
 			return esClient.insert(dataList, index_name, index_type) ;	
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 		this.logger.error(e.getMessage());
 			return false;
 		}	finally{
-			cp2.returnObject(esClient);			
+			esClientPoolManager.returnObject(esClient);			
 		}			
 	}
 
@@ -101,7 +106,7 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 		// TODO Auto-generated method stub			
 		ESClientImp esClient = null;
 		try {			
-			 esClient = cp2.borrowObject();
+			 esClient = esClientPoolManager.borrowObject();
 			 QueryBuilder	queryBuilder = this.esCreatQueryBuilder.createQueryBuilder(contentMap, SearchLogic.must);
 			 return esClient.deleteByQuery(indexNames, indexTypes, queryBuilder);
 		} catch (Exception e) {
@@ -109,7 +114,7 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 		this.logger.error(e.getMessage());
 			return false;
 		}	finally{
-			cp2.returnObject(esClient);			
+			esClientPoolManager.returnObject(esClient);			
 		}
 		    
 			
@@ -307,14 +312,14 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 
 		ESClientImp esClient = null;
 		try {			
-			 esClient = cp2.borrowObject();
+			 esClient = esClientPoolManager.borrowObject();
 			  return esClient.deleteIndexByName(indexNames);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 		this.logger.error(e.getMessage());
 			return false;
 		}	finally{
-			cp2.returnObject(esClient);			
+			esClientPoolManager.returnObject(esClient);			
 		}	
   }
   
@@ -323,14 +328,14 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 	  // TODO Auto-generated method stub
 			ESClientImp esClient = null;
 			try {			
-				 esClient = cp2.borrowObject();
+				 esClient = esClientPoolManager.borrowObject();
 				  return esClient.deleteIndexTemplate(deleteIndexTemplateName);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 			this.logger.error(e.getMessage());
 				return false;
 			}	finally{
-				cp2.returnObject(esClient);			
+				esClientPoolManager.returnObject(esClient);			
 			}	
 		}
 
@@ -338,14 +343,14 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 		// TODO Auto-generated method stub
 		ESClientImp esClient = null;
 		try {			
-			 esClient = cp2.borrowObject();
+			 esClient = esClientPoolManager.borrowObject();
 				return esClient.creatIndex(indexName);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 		this.logger.error(e.getMessage());
 			return false;
 		}	finally{
-			cp2.returnObject(esClient);			
+			esClientPoolManager.returnObject(esClient);			
 		}	
 	}
 

@@ -14,28 +14,30 @@ import java.util.Map.Entry;
 
 
 
+
 import org.apache.log4j.Logger;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.ExistsFilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.NotFilterBuilder;
+
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryFilterBuilder;
 import org.elasticsearch.search.SearchHit;
+
+import com.keyanpai.common.ESClientPoolManager;
 import com.keyanpai.common.ESCreatQueryBuilder;
 import com.keyanpai.common.MySearchOption;
 import com.keyanpai.common.MySearchOption.DataFilter;
 import com.keyanpai.common.MySearchOption.SearchLogic;
-import com.keyanpai.dao.esClient.CommonPool2;
 import com.keyanpai.dao.esClient.ESClientImp;
 
 
 public class ESSearchImp implements ESSearchInterface {
 	
 	
-	private CommonPool2 cp2 = CommonPool2.getCommonPool2() ;
+	private ESClientPoolManager esClientPoolManager = null ;
 	private ESCreatQueryBuilder esCreatQueryBuilder = null;
 	private Logger logger = Logger.getLogger("Service.ESSearchImp");	
 
@@ -45,10 +47,15 @@ public class ESSearchImp implements ESSearchInterface {
 	public void setEsCreatQueryBuilder(ESCreatQueryBuilder esCreatQueryBuilder) {
 		this.esCreatQueryBuilder = esCreatQueryBuilder;
 	}
-	public void setCommonPool2(CommonPool2 cp2) {		
-			this.cp2 = cp2;
-	}
 
+
+	
+	public ESClientPoolManager getEsClientPoolManager() {
+		return esClientPoolManager;
+	}
+	public void setEsClientPoolManager(ESClientPoolManager esClientPoolManager) {
+		this.esClientPoolManager = esClientPoolManager;
+	}
 	public List<Map<String, Object>> simpleSearch(String[] indexNames,String[] indexTypes
 			,HashMap<String, Object[]> searchContentMap
 			,SearchLogic searchLogic
@@ -66,15 +73,16 @@ public class ESSearchImp implements ESSearchInterface {
 			queryBuilder = this.createFilterBuilder(filterLogic,queryBuilder,searchContentMap
 					,filterContentMap);
 			ESClientImp esClient = null;
+			
 			try{
-				esClient = cp2.borrowObject();
+				esClient = esClientPoolManager.borrowObject();
 				return this.getSearchResult(esClient.query(queryBuilder, indexNames, indexTypes, from, offset, sortField, sortType));
 			}
 			catch(Exception e){
 				this.logger.error(e.getMessage());
 			}
 			finally{
-				cp2.returnObject(esClient);
+				esClientPoolManager.returnObject(esClient);
 			}		
 		return null;
 	}
@@ -124,42 +132,48 @@ public class ESSearchImp implements ESSearchInterface {
 			HashMap<String, Object[]> searchContentMap,
 			HashMap<String, Object[]> filterContentMap) {
 		// TODO Auto-generated method stub
-		try{
+		if(null == searchContentMap|| searchContentMap.size() == 0)
+		{
+			System.out.println("searchContentMap == null");
+			QueryFilterBuilder queryFilterBuilder = FilterBuilders				
+					.queryFilter(this.esCreatQueryBuilder.createQueryBuilder(filterContentMap, filterLogic));
+			return QueryBuilders.filteredQuery( queryBuilder,queryFilterBuilder);
+		}
+		try{			
+				Iterator<Entry<String,Object[]>> iterator = searchContentMap.entrySet().iterator();			
+				AndFilterBuilder andFilterBuilder = null;
+				while(iterator.hasNext()){
+					Entry<String,Object[]> entry =iterator.next();
+					  Object[] values = entry.getValue();
+					  if (!this.checkValue(values)) {
+						  continue;
+					  }
+					  MySearchOption mySearchOption = this.getSearchOption(values);
+					  if (mySearchOption.getDataFilter() == DataFilter.exists) {
+						  /*被搜索的条件必须有值，exists过滤条件*/
+						  ExistsFilterBuilder existsFilterBuilder = FilterBuilders.existsFilter(entry.getKey());
+						  if (andFilterBuilder == null) {
+							  andFilterBuilder = FilterBuilders.andFilter(existsFilterBuilder);
+						  }
+						  else {
+							  andFilterBuilder = andFilterBuilder.add(existsFilterBuilder);
+						  }
+					  }
+				}			
+			   if (filterContentMap == null || filterContentMap.isEmpty()) {
+				 /*如果没有其它过滤条件，返回*/					
+				 return QueryBuilders.filteredQuery(queryBuilder, andFilterBuilder);
+			   }
 			
-			Iterator<Entry<String,Object[]>> iterator = searchContentMap.entrySet().iterator();
-			AndFilterBuilder andFilterBuilder = null;
-			while(iterator.hasNext()){
-				Entry<String,Object[]> entry =iterator.next();
-				  Object[] values = entry.getValue();
-				  if (!this.checkValue(values)) {
-					  continue;
-				  }
-				  MySearchOption mySearchOption = this.getSearchOption(values);
-				  if (mySearchOption.getDataFilter() == DataFilter.exists) {
-					  /*被搜索的条件必须有值，exists过滤条件*/
-					  ExistsFilterBuilder existsFilterBuilder = FilterBuilders.existsFilter(entry.getKey());
-					  if (andFilterBuilder == null) {
-						  andFilterBuilder = FilterBuilders.andFilter(existsFilterBuilder);
-					  }
-					  else {
-						  andFilterBuilder = andFilterBuilder.add(existsFilterBuilder);
-					  }
-				  }
-			}
-		   if (filterContentMap == null || filterContentMap.isEmpty()) {
-			 /*如果没有其它过滤条件，返回*/					
-			 return QueryBuilders.filteredQuery(queryBuilder, andFilterBuilder);
-		   }
 		     /*构造过滤条件*/
 			//System.out.println("filterContentMap != null");
 			QueryFilterBuilder queryFilterBuilder = FilterBuilders				
 					.queryFilter(this.esCreatQueryBuilder.createQueryBuilder(filterContentMap, filterLogic));
 			/*构造not过滤条件，表示搜索结果不包含这些内容，而不是不过滤*/
-		    NotFilterBuilder notFilterBuilder = FilterBuilders.notFilter(queryFilterBuilder);
-			return QueryBuilders.filteredQuery(
-						  queryBuilder, FilterBuilders.andFilter(andFilterBuilder, notFilterBuilder));
+//		    NotFilterBuilder notFilterBuilder = FilterBuilders.notFilter(queryFilterBuilder);
 //			return QueryBuilders.filteredQuery(
-//						  queryBuilder, FilterBuilders.andFilter(andFilterBuilder,queryFilterBuilder));
+//						  queryBuilder, FilterBuilders.andFilter(andFilterBuilder, notFilterBuilder));
+				return QueryBuilders.filteredQuery( queryBuilder,FilterBuilders.andFilter(andFilterBuilder,queryFilterBuilder));
 			
 		}
 		catch(Exception e){
@@ -211,8 +225,11 @@ public class ESSearchImp implements ESSearchInterface {
 						,filterContentMap);
 				
 		ESClientImp esClient = null;
+//		return esClient.query(
+//				 queryBuilder, indexNames, indexTypes, 0, 1, null, null)
+//				 .getHits().totalHits();
 		try{
-			esClient = cp2.borrowObject();
+			esClient = esClientPoolManager.borrowObject();
 			return esClient.query(
 							 queryBuilder, indexNames, indexTypes, 0, 1, null, null)
 							 .getHits().totalHits();
@@ -221,11 +238,8 @@ public class ESSearchImp implements ESSearchInterface {
 				this.logger.error(e.getMessage());
 		}
 		finally{
-				cp2.returnObject(esClient);
-		}			
-		
-	
-	
+				esClientPoolManager.returnObject(esClient);
+		}					
 		return 0;
 		
 	}
