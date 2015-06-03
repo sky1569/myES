@@ -14,8 +14,8 @@ import com.keyanpai.common.MySearchOption.SearchLogic;
 
 
 public class ESCreatQueryBuilder {
-	private Logger logger = Logger.getLogger("Service.ESCreatQueryBuilder");	
-	public ESCreatQueryBuilder(){}
+	private Logger logger = Logger.getLogger("Service.ESCreatQueryBuilder");
+
 	public QueryBuilder createQueryBuilder(
 			HashMap<String, Object[]> searchContentMap, SearchLogic searchLogic) {
 		// TODO Auto-generated method stub

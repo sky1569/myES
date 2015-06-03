@@ -7,6 +7,20 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
+<build>
+  <pluginManagement>
+   <plugins>
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>          
+        <configuration>
+            <source>1.7</source>
+            <target>1.7</target>
+        </configuration>
+    </plugin>
+   </plugins>
+  </pluginManagement>
+ </build>
   <name>com.D-media.keyanpai</name>
   <url>http://maven.apache.org</url>
 
@@ -21,11 +35,12 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
+<dependency>
 	<groupId>org.elasticsearch</groupId>
 	<artifactId>elasticsearch</artifactId>
-	<version>1.5.1</version>
+	<version>1.5.2</version>
 </dependency>
+
 <dependency>
 	<groupId>log4j</groupId>
 	<artifactId>log4j</artifactId>
@@ -95,6 +110,12 @@
 	<version>1.6.2</version>
 </dependency>
 
+
+<dependency>
+	<groupId>org.hibernate</groupId>
+	<artifactId>hibernate-entitymanager</artifactId>
+	<version>4.3.8.Final</version>
+</dependency>
 
 
 

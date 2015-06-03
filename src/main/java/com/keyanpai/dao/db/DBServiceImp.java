@@ -97,6 +97,8 @@ public class DBServiceImp implements DBService{
 		// TODO Auto-generated method stub
 		String sql = "select *  from "+ this.dbC.getDatabaseName() + "." + priTableName + " limit %s,%s";
 		ResultSet rs = stmt.executeQuery(String.format(sql, offsets * this.dbC.getMaxRecoder(), this.dbC.getMaxRecoder()));
+	
+		
 		List<XContentBuilder> result = new ArrayList<XContentBuilder>();
 		String dataType = null;
 		String colmnuName = null;

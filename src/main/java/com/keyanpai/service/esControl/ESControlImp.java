@@ -70,7 +70,9 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 		this.logger.error(e.getMessage());
 			return false;
 		}	finally{
-			esClientPoolManager.returnObject(esClient);			
+			if(esClient != null){
+				esClientPoolManager.returnObject(esClient);		
+			}
 		}			
 	}
 
@@ -114,7 +116,9 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 		this.logger.error(e.getMessage());
 			return false;
 		}	finally{
-			esClientPoolManager.returnObject(esClient);			
+			if(esClient != null){
+				esClientPoolManager.returnObject(esClient);		
+			}			
 		}
 		    
 			
@@ -319,8 +323,10 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 		this.logger.error(e.getMessage());
 			return false;
 		}	finally{
-			esClientPoolManager.returnObject(esClient);			
-		}	
+			if(esClient != null){
+					esClientPoolManager.returnObject(esClient);		
+				}
+			}	
   }
   
   public boolean deleteIndexTemplate(String deleteIndexTemplateName)
@@ -335,7 +341,9 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 			this.logger.error(e.getMessage());
 				return false;
 			}	finally{
-				esClientPoolManager.returnObject(esClient);			
+				if(esClient != null){
+					esClientPoolManager.returnObject(esClient);		
+				}
 			}	
 		}
 
@@ -350,7 +358,9 @@ public class ESControlImp extends ESControl implements ESControlInterface{
 		this.logger.error(e.getMessage());
 			return false;
 		}	finally{
-			esClientPoolManager.returnObject(esClient);			
+			if(esClient != null){
+				esClientPoolManager.returnObject(esClient);		
+			}
 		}	
 	}
 

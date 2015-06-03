@@ -82,7 +82,9 @@ public class ESSearchImp implements ESSearchInterface {
 				this.logger.error(e.getMessage());
 			}
 			finally{
-				esClientPoolManager.returnObject(esClient);
+				if(esClient != null){
+					esClientPoolManager.returnObject(esClient);		
+				}
 			}		
 		return null;
 	}
@@ -239,7 +241,9 @@ public class ESSearchImp implements ESSearchInterface {
 				this.logger.error(e.getMessage());
 		}
 		finally{
-				esClientPoolManager.returnObject(esClient);
+			if(esClient != null){
+				esClientPoolManager.returnObject(esClient);		
+			}
 		}					
 		return 0;
 		
