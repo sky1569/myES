@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+					http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">	
+	<bean id ="esCreatQueryBuilder" class = "com.keyanpai.common.ESCreatQueryBuilder"></bean>
+	<bean id ="esClientPoolManager" class = "com.keyanpai.common.ESClientPoolManager">
+		<constructor-arg value = "14"/>
+		<constructor-arg value = "3"/>
+	</bean>
+	
+	<bean id = "esSearchImp" class = "com.keyanpai.service.esSearch.ESSearchImp">
+		<property name ="esCreatQueryBuilder" ref = "esCreatQueryBuilder"/>
+		<property name ="esClientPoolManager" ref="esClientPoolManager"/>
+	</bean>
+
+	<bean id = "esControlImp" class = "com.keyanpai.service.esControl.ESControlImp">
+		<property name ="esCreatQueryBuilder" ref = "esCreatQueryBuilder"/>
+		<property name ="esClientPoolManager" ref="esClientPoolManager"/>
+	</bean>
+	
+	<!--  bean id = "esStatsImp" class = "com.keyanpai.service.esStats.ESStatsImp">
+		<property name ="esCreatQueryBuilder" ref = "esCreatQueryBuilder"/>
+	</bean>-->
+</beans>

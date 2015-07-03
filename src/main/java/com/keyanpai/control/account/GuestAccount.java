@@ -4,26 +4,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import com.keyanpai.common.MySearchOption.SearchLogic;
 import com.keyanpai.service.esSearch.ESSearchImp;
+import com.keyanpai.service.esSearch.ESSearchInterface;
 
 
 
 public class GuestAccount extends Account implements AccountSearchInterface{
 
-	public ESSearchImp esSearchImp ;
+	protected ESSearchInterface esSearchImp ;
 
-	public ESSearchImp getEsSearchImp() {
-		return esSearchImp;
+	public ESSearchInterface getEsSearchImp() {
+		return this.esSearchImp;
 	}
 
 	public void setEsSearchImp(ESSearchImp esSearchImp) {
 		this.esSearchImp = esSearchImp;
 	}
 
-	public GuestAccount(){
-	}
+
 	
 	public List<Map<String, Object>> search(String[] indexNames
 			,String[] indexTypes

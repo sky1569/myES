@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+					http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+					
+<!-- 完成业务逻辑具体实现类的工具注入  -->
+    <import resource = "Commom2ServiceBeans.xml"/>
+
+	
+<!-- 完成业务逻辑实现类向帐户类注入  -->
+	<import resource = "Service2AccountBeans.xml"/>
+
+</beans> 
